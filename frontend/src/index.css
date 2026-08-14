@@ -165,7 +165,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px 0 0;
+  padding: 0 24px 0 40px;
   z-index: 10;
   margin-top: calc(var(--grid-size) * 0.25);
   margin-bottom: calc(var(--grid-size) * 0.25);

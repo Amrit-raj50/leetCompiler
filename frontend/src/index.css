@@ -42,6 +42,7 @@ body {
   flex-direction: column;
   height: 100vh;
   width: 100%;
+  position: relative;
 }
 
 .workspace {
@@ -49,7 +50,7 @@ body {
   flex: 1;
   overflow: hidden;
   padding: 0 24px 16px 24px;
-  gap: 0;
+  gap: 50px; /* Space for the absolute spiral binding */
 }
 
 /* Sketch Box Effect */
@@ -68,8 +69,12 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
-  z-index: 20;
-  position: relative;
+  z-index: 50; /* Above navbar */
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   /* Deep gutter shadow to make pages look folded inwards */
   background: linear-gradient(
     to right,
@@ -118,22 +123,22 @@ body {
   transform: rotate(-12deg);
 }
 
-.pane {
+.left-pane {
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.left-pane {
-  flex: 1;
-  min-width: 300px;
+  border-right: none;
 }
 
 .right-pane {
-  flex: 1.2;
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  overflow: hidden;
+  gap: 16px;
 }
 
 .editor-pane {
@@ -271,20 +276,28 @@ body {
   overflow: auto;
   padding: 0 24px;
   background-color: var(--paper-bg);
-  background-image: linear-gradient(var(--line-color) 1px, transparent 1px);
-  background-size: 100% var(--grid-size);
-  background-attachment: local; /* This ensures lines scroll with the text! */
-  background-position: 0 0;
-}
-
-.left-pane .pane-content {
   background-image: 
     linear-gradient(var(--line-color) 1px, transparent 1px),
     linear-gradient(90deg, transparent 60px, var(--margin-line) 60px, var(--margin-line) 61px, transparent 61px);
   background-size: 100% var(--grid-size), 100% 100%;
-  background-attachment: local, local;
+  background-attachment: local, local; /* Scrolls natively */
   background-position: 0 0, 0 0;
+}
+
+.left-pane .pane-content {
   padding-left: 80px; /* Push text past the red margin line */
+}
+
+.console-pane .pane-content {
+  padding-left: 80px; /* Push console text past margin */
+}
+
+.editor-pane .pane-content {
+  padding: 0; /* Monaco handles its own left margin */
+  overflow: hidden; /* Monaco scrolls internally */
+  /* Sync the background position with Monaco's internal scroll! */
+  background-position: 0 calc(var(--scroll-y, 0px) * -1), 0 0;
+  background-attachment: scroll, scroll; 
 }
 
 /* Problem Description */

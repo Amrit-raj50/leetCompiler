@@ -12,7 +12,7 @@ function App() {
         <ProblemDescription />
         
         <div className="spiral-binding">
-          {Array.from({ length: 30 }).map((_, i) => (
+          {Array.from({ length: 40 }).map((_, i) => (
             <div key={i} className="ring"></div>
           ))}
         </div>

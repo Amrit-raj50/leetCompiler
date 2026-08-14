@@ -1,15 +1,36 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { Code, ChevronDown } from 'lucide-react';
 
 const CodeEditor = () => {
   const [lang, setLang] = useState('cpp');
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   const langLabels = {
     cpp: 'C++',
     java: 'Java',
     python: 'Python 3',
-    javascript: 'JavaScript'
+    javascript: 'JavaScript',
+    c: 'C',
+    csharp: 'C#',
+    ruby: 'Ruby',
+    swift: 'Swift',
+    go: 'Go',
+    kotlin: 'Kotlin',
+    rust: 'Rust',
+    php: 'PHP'
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const [code, setCode] = useState(`class Solution {
 public:
@@ -34,22 +55,54 @@ public:
         <span>Code</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', padding: '8px 16px', borderBottom: '2px solid var(--sketch-border)' }}>
-        <div className="select-wrapper" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
-          <span style={{ fontSize: '1.2rem', fontWeight: 600, fontFamily: 'var(--font-hand)', marginRight: '4px' }}>
+        <div className="select-wrapper" ref={dropdownRef} onClick={() => setIsOpen(!isOpen)} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
+          <span style={{ fontSize: '1.2rem', fontWeight: 600, fontFamily: 'var(--font-hand)', marginRight: '4px', userSelect: 'none' }}>
             {langLabels[lang]}
           </span>
           <ChevronDown size={16} />
-          <select 
-            className="lang-select" 
-            value={lang}
-            onChange={(e) => setLang(e.target.value)}
-            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
-          >
-            <option value="cpp">C++</option>
-            <option value="java">Java</option>
-            <option value="python">Python 3</option>
-            <option value="javascript">JavaScript</option>
-          </select>
+          
+          {isOpen && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              marginTop: '8px',
+              backgroundColor: 'var(--paper-bg)',
+              border: '2px solid var(--sketch-border)',
+              borderRadius: '4px 8px 3px 6px / 7px 4px 6px 3px',
+              boxShadow: '2px 4px 12px rgba(0,0,0,0.1)',
+              zIndex: 100,
+              minWidth: '140px',
+              maxHeight: '288px', /* 6 lines exactly (48px * 6) */
+              overflowY: 'auto',
+              backgroundImage: 'linear-gradient(var(--line-color) 1px, transparent 1px)',
+              backgroundSize: '100% var(--grid-size)',
+              backgroundPosition: '0 -1px',
+            }}>
+              {Object.entries(langLabels).map(([key, label]) => (
+                <div 
+                  key={key}
+                  onClick={(e) => { e.stopPropagation(); setLang(key); setIsOpen(false); }}
+                  style={{
+                    height: 'var(--grid-size)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0 16px',
+                    fontFamily: 'var(--font-hand)',
+                    fontSize: '1rem',
+                    color: lang === key ? '#16a34a' : 'var(--text-ink)',
+                    fontWeight: lang === key ? 700 : 500,
+                    cursor: 'pointer',
+                    userSelect: 'none'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <div className="pane-content" ref={editorContentRef} style={{ padding: 0, overflow: 'hidden', flex: 1 }}>

@@ -39,8 +39,8 @@ public:
             fontFamily: "'JetBrains Mono', monospace",
             scrollBeyondLastLine: false,
             smoothScrolling: true,
-            padding: { top: 12 },
-            lineHeight: 24,
+            padding: { top: 0 }, /* Remove padding to perfectly align with 48px grid */
+            lineHeight: 48, /* Exactly match notebook line height */
             renderLineHighlight: 'none',
             hideCursorInOverviewRuler: true,
             overviewRulerBorder: false,

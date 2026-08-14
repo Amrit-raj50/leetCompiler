@@ -10,15 +10,7 @@ const Navbar = () => {
       </div>
 
       <div className="nav-actions">
-        <div className="select-wrapper">
-          <select className="lang-select" defaultValue="cpp">
-            <option value="cpp">C++</option>
-            <option value="java">Java</option>
-            <option value="python">Python 3</option>
-            <option value="javascript">JavaScript</option>
-          </select>
-          <ChevronDown className="select-icon" size={16} />
-        </div>
+
 
         <button className="btn-icon" title="Theme">
           <Moon size={18} />
@@ -28,9 +20,8 @@ const Navbar = () => {
           <Settings size={18} />
         </button>
 
-        <button className="btn btn-run">
-          <Play size={16} fill="currentColor" />
-          Run
+        <button className="btn-icon btn-run" title="Run">
+          <Play size={20} fill="currentColor" />
         </button>
 
         <button className="btn btn-submit">

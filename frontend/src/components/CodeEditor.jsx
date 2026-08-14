@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import Editor from '@monaco-editor/react';
-import { Code } from 'lucide-react';
+import { Code, ChevronDown } from 'lucide-react';
 
 const CodeEditor = () => {
   const [code, setCode] = useState(`class Solution {
@@ -24,6 +24,17 @@ public:
       <div className="pane-header">
         <Code />
         <span>Code</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '8px 16px', borderBottom: '2px solid var(--sketch-border)' }}>
+        <div className="select-wrapper">
+          <select className="lang-select" defaultValue="cpp" style={{ fontSize: '1.2rem', padding: '0 16px 0 0' }}>
+            <option value="cpp">C++</option>
+            <option value="java">Java</option>
+            <option value="python">Python 3</option>
+            <option value="javascript">JavaScript</option>
+          </select>
+          <ChevronDown className="select-icon" size={16} style={{ right: 0 }} />
+        </div>
       </div>
       <div className="pane-content" ref={editorContentRef} style={{ padding: 0, overflow: 'hidden', flex: 1 }}>
         <Editor

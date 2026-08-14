@@ -3,6 +3,14 @@ import Editor from '@monaco-editor/react';
 import { Code, ChevronDown } from 'lucide-react';
 
 const CodeEditor = () => {
+  const [lang, setLang] = useState('cpp');
+  const langLabels = {
+    cpp: 'C++',
+    java: 'Java',
+    python: 'Python 3',
+    javascript: 'JavaScript'
+  };
+
   const [code, setCode] = useState(`class Solution {
 public:
     vector<int> twoSum(vector<int>& nums, int target) {
@@ -26,14 +34,22 @@ public:
         <span>Code</span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', padding: '8px 16px', borderBottom: '2px solid var(--sketch-border)' }}>
-        <div className="select-wrapper">
-          <select className="lang-select" defaultValue="cpp" style={{ fontSize: '1.2rem', padding: '0 16px 0 0' }}>
+        <div className="select-wrapper" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
+          <span style={{ fontSize: '1.2rem', fontWeight: 600, fontFamily: 'var(--font-hand)', marginRight: '4px' }}>
+            {langLabels[lang]}
+          </span>
+          <ChevronDown size={16} />
+          <select 
+            className="lang-select" 
+            value={lang}
+            onChange={(e) => setLang(e.target.value)}
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
+          >
             <option value="cpp">C++</option>
             <option value="java">Java</option>
             <option value="python">Python 3</option>
             <option value="javascript">JavaScript</option>
           </select>
-          <ChevronDown className="select-icon" size={16} style={{ right: 0 }} />
         </div>
       </div>
       <div className="pane-content" ref={editorContentRef} style={{ padding: 0, overflow: 'hidden', flex: 1 }}>

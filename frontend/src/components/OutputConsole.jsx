@@ -29,15 +29,15 @@ const OutputConsole = () => {
       <div className="pane-content console-output">
         {activeTab === 'testcases' ? (
           <div>
-            <div style={{ marginBottom: '16px' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>nums =</div>
-              <div style={{ backgroundColor: 'var(--bg-tertiary)', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+            <div>
+              <div style={{ color: 'var(--text-muted)' }}>nums =</div>
+              <div style={{ paddingLeft: '24px' }}>
                 [2,7,11,15]
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>target =</div>
-              <div style={{ backgroundColor: 'var(--bg-tertiary)', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+              <div style={{ color: 'var(--text-muted)' }}>target =</div>
+              <div style={{ paddingLeft: '24px' }}>
                 9
               </div>
             </div>

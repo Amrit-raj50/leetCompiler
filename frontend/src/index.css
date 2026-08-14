@@ -370,7 +370,7 @@ body {
 .console-output {
   font-family: var(--font-mono);
   font-size: 1rem;
-  padding: 16px;
+  line-height: var(--grid-size);
 }
 
 .console-placeholder {

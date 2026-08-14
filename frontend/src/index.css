@@ -1,0 +1,374 @@
+@import url('https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --paper-bg: #fdfbf7;
+  --line-color: #cbd5e1;
+  --margin-line: #fca5a5;
+  --text-ink: #1e293b;
+  --text-muted: #64748b;
+  --grid-size: 48px;
+  
+  --sketch-border: #334155;
+  
+  --font-hand: 'Balsamiq Sans', 'Comic Sans MS', cursive;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-hand);
+  background-color: var(--paper-bg);
+  color: var(--text-ink);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  font-size: 18px;
+}
+
+#root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Layout Utilities */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+}
+
+.workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  padding: 0 24px 16px 24px;
+  gap: 0;
+}
+
+/* Sketch Box Effect */
+.sketch-box {
+  position: relative;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 2px solid var(--sketch-border);
+  border-radius: 4px 8px 3px 6px / 7px 4px 6px 3px;
+  box-shadow: 2px 3px 6px rgba(0,0,0,0.05);
+}
+
+/* Realistic Spiral Binding */
+.spiral-binding {
+  width: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  z-index: 20;
+  position: relative;
+  /* Deep gutter shadow to make pages look folded inwards */
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,0.05) 30%,
+    rgba(0,0,0,0.15) 50%,
+    rgba(0,0,0,0.05) 70%,
+    rgba(0,0,0,0) 100%
+  );
+}
+
+/* Metallic Coil Wire */
+.ring {
+  width: 36px;
+  height: 16px; /* Deeper curve */
+  background: transparent;
+  border: 3px solid #64748b; /* Solid metallic gray wire */
+  border-bottom: 0; /* Remove bottom to create an open arch */
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0; /* Perfect half-ellipse curve */
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(1px 6px 3px rgba(0,0,0,0.4)); /* Shadow follows the curved wire */
+  transform: rotate(12deg); /* Angled continuous spiral */
+}
+
+/* Punched Holes */
+.ring::before, .ring::after {
+  content: '';
+  position: absolute;
+  bottom: -6px; /* Position holes exactly at the ends of the wire arch */
+  width: 12px;
+  height: 12px;
+  background-color: #0f172a;
+  border-radius: 50%;
+  z-index: -1;
+  box-shadow: inset 1px 2px 4px rgba(0,0,0,0.9), inset -1px -1px 2px rgba(255,255,255,0.1);
+}
+
+.ring::before {
+  left: -5px;
+  transform: rotate(-12deg);
+}
+
+.ring::after {
+  right: -5px;
+  transform: rotate(-12deg);
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.left-pane {
+  flex: 1;
+  min-width: 300px;
+}
+
+.right-pane {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.editor-pane {
+  flex: 2;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--paper-bg);
+  background-image: linear-gradient(var(--line-color) 1px, transparent 1px);
+  background-size: 100% var(--grid-size);
+  background-position: 0 0;
+}
+
+.console-pane {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar */
+.navbar {
+  height: var(--grid-size);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px 0 0;
+  z-index: 10;
+  margin-top: calc(var(--grid-size) * 0.25);
+  margin-bottom: calc(var(--grid-size) * 0.25);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 2.2rem;
+  color: var(--text-ink);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Controls & Buttons */
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.lang-select {
+  appearance: none;
+  background-color: transparent;
+  color: var(--text-ink);
+  padding: 0 32px 0 12px;
+  font-family: var(--font-hand);
+  font-size: 1.6rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  border: none;
+}
+
+.select-icon {
+  position: absolute;
+  right: 8px;
+  pointer-events: none;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 20px;
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 1.6rem;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-ink);
+  transition: transform 0.1s;
+}
+
+.btn:hover {
+  transform: scale(1.05) rotate(-2deg);
+}
+
+.btn-run {
+  color: #16a34a;
+}
+
+.btn-submit {
+  background-color: #22c55e;
+  color: white;
+  border-radius: 4px 8px 3px 6px / 7px 4px 6px 3px;
+  border: 2px solid #16a34a;
+}
+
+.btn-submit:hover {
+  background-color: #16a34a;
+}
+
+.btn-icon {
+  background: transparent;
+  color: var(--text-ink);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.btn-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Pane Headers */
+.pane-header {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  border-bottom: 2px solid var(--sketch-border);
+  background-color: rgba(0,0,0,0.02);
+}
+
+.pane-content {
+  flex: 1;
+  overflow: auto;
+  padding: 0 24px;
+  background-color: var(--paper-bg);
+  background-image: linear-gradient(var(--line-color) 1px, transparent 1px);
+  background-size: 100% var(--grid-size);
+  background-attachment: local; /* This ensures lines scroll with the text! */
+  background-position: 0 0;
+}
+
+.left-pane .pane-content {
+  background-image: 
+    linear-gradient(var(--line-color) 1px, transparent 1px),
+    linear-gradient(90deg, transparent 60px, var(--margin-line) 60px, var(--margin-line) 61px, transparent 61px);
+  background-size: 100% var(--grid-size), 100% 100%;
+  background-attachment: local, local;
+  background-position: 0 0, 0 0;
+  padding-left: 80px; /* Push text past the red margin line */
+}
+
+/* Problem Description */
+.prose, .prose p, .prose h1, .prose h3, .prose ul, .prose li {
+  line-height: var(--grid-size) !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important; /* No gaps between paragraphs */
+}
+
+.prose h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.difficulty-badge {
+  display: block;
+  width: fit-content;
+  padding: 2px 16px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #d97706;
+  border: 2px solid #d97706;
+  border-radius: 3px 7px 4px 2px / 5px 3px 6px 4px;
+  margin-bottom: 0 !important;
+}
+
+.prose pre {
+  padding: 0;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  line-height: var(--grid-size) !important; /* Exactly line by line */
+  background: transparent; /* Remove dark background */
+  font-family: var(--font-mono);
+  font-size: 1rem;
+}
+
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: rgba(0,0,0,0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Output Console */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid var(--sketch-border);
+  background-color: rgba(0,0,0,0.02);
+}
+
+.tab {
+  padding: 8px 24px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+}
+
+.tab.active {
+  border-bottom-color: var(--sketch-border);
+  background-color: rgba(255,255,255,0.5);
+}
+
+.console-output {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  padding: 16px;
+}
+
+.console-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  font-family: var(--font-hand);
+}
+
+/* Force Monaco Editor to be transparent to show notebook lines */
+.editor-pane .monaco-editor,
+.editor-pane .monaco-editor-background,
+.editor-pane .monaco-editor .margin {
+  background-color: transparent !important;
+}
+

@@ -313,15 +313,20 @@ body {
 }
 
 .difficulty-badge {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   width: fit-content;
-  padding: 2px 16px;
-  font-size: 1.3rem;
+  height: calc(var(--grid-size) - 10px); /* Smaller than grid to fit inside lines */
+  margin-top: 10px !important; /* Push down to sit on the bottom line */
+  margin-bottom: 0 !important;
+  padding: 0 16px;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #d97706;
   border: 2px solid #d97706;
   border-radius: 3px 7px 4px 2px / 5px 3px 6px 4px;
-  margin-bottom: 0 !important;
 }
 
 .prose pre {

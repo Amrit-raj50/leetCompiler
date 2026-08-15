@@ -65,7 +65,7 @@ const Navbar = ({
           style={{ 
             cursor: 'pointer', 
             padding: '4px 16px',
-            backgroundColor: 'var(--paper-bg)',
+            backgroundColor: 'rgba(253, 224, 71, 0.6)', /* Rough yellow highlight */
             transition: 'transform 0.1s ease'
           }} 
           onClick={onGoHome}

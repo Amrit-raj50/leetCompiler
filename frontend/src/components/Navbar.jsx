@@ -16,7 +16,7 @@ const Navbar = ({
   return (
     <nav className="navbar">
       {/* Brand & Navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div className="nav-left" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
         <button
           onClick={onGoHome}
           className="btn-icon"
@@ -44,6 +44,7 @@ const Navbar = ({
 
         {/* Mode Tag */}
         <span
+          className="mode-tag"
           style={{
             fontSize: '0.85rem',
             fontFamily: 'var(--font-hand)',
@@ -59,7 +60,7 @@ const Navbar = ({
           }}
         >
           {isIntegrated ? <Zap size={14} /> : <Unlock size={14} />}
-          {isIntegrated ? `Integrated: ${currentProblem?.title || 'Problem'}` : 'Standalone Compiler (VS Code)'}
+          <span>{isIntegrated ? `Integrated: ${currentProblem?.title || 'Problem'}` : 'Standalone Compiler'}</span>
         </span>
 
         {/* Quick Problem Switcher for Integrated Mode */}

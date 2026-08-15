@@ -58,7 +58,7 @@ const CodeEditor = ({
           <span>Code</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'var(--font-hand)' }}>
+          <span className="hide-on-mobile" style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'var(--font-hand)' }}>
             Ctrl + Enter to Run
           </span>
           <button

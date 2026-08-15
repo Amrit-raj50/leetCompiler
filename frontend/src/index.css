@@ -141,6 +141,21 @@ body {
   gap: 16px;
 }
 
+.standalone-workspace {
+  gap: 0;
+  padding: 0 24px 16px 24px;
+}
+
+.full-editor-pane {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 16px;
+  width: 100%;
+}
+
 .editor-pane {
   flex: 2;
   overflow: hidden;
@@ -403,4 +418,18 @@ body {
 .editor-pane .monaco-editor .margin {
   background-color: transparent !important;
 }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 

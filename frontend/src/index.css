@@ -432,4 +432,202 @@ body {
   animation: spin 1s linear infinite;
 }
 
+/* ========================================================= */
+/* 📱 MOBILE RESPONSIVE MEDIA QUERIES (Phone View)           */
+/* Laptop/Desktop styles above remain 100% UNTOUCHED!        */
+/* ========================================================= */
+
+@media (max-width: 768px) {
+  body {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    font-size: 16px;
+  }
+
+  #root,
+  .app-container {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-y: visible !important;
+  }
+
+  /* Stack panes vertically on mobile */
+  .workspace {
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+    gap: 20px !important;
+    padding: 0 12px 24px 12px !important;
+  }
+
+  .standalone-workspace {
+    padding: 0 12px 24px 12px !important;
+    gap: 16px !important;
+  }
+
+  /* Hide center spiral binding on phone screens */
+  .spiral-binding {
+    display: none !important;
+  }
+
+  /* Panes stack full width */
+  .left-pane,
+  .right-pane,
+  .full-editor-pane {
+    flex: none !important;
+    width: 100% !important;
+    height: auto !important;
+    min-width: 0 !important;
+  }
+
+  .left-pane {
+    max-height: 480px !important;
+    border: 2px solid var(--sketch-border);
+    border-radius: 4px 8px 3px 6px / 7px 4px 6px 3px;
+  }
+
+  .editor-pane {
+    min-height: 380px !important;
+    height: 420px !important;
+    border: 2px solid var(--sketch-border);
+    border-radius: 4px 8px 3px 6px / 7px 4px 6px 3px;
+  }
+
+  .console-pane {
+    min-height: 280px !important;
+    height: auto !important;
+    border: 2px solid var(--sketch-border) !important;
+    border-radius: 4px 8px 3px 6px / 7px 4px 6px 3px !important;
+  }
+
+  /* Text margins past red line on mobile */
+  .left-pane .pane-content,
+  .console-pane .pane-content {
+    padding-left: 36px !important;
+    padding-right: 14px !important;
+  }
+
+  .pane-content {
+    background-image: 
+      linear-gradient(var(--line-color) 1px, transparent 1px),
+      linear-gradient(90deg, transparent 24px, var(--margin-line) 24px, var(--margin-line) 25px, transparent 25px) !important;
+  }
+
+  /* Mobile Navbar */
+  .navbar {
+    height: auto !important;
+    min-height: var(--grid-size);
+    padding: 8px 12px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    margin-top: 4px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .nav-left {
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+
+  .nav-brand {
+    font-size: 1.5rem !important;
+  }
+
+  .mode-tag {
+    max-width: 170px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 0.78rem !important;
+  }
+
+  .nav-actions {
+    gap: 8px !important;
+    width: 100% !important;
+    justify-content: flex-end !important;
+  }
+
+  .btn {
+    font-size: 1.15rem !important;
+    padding: 2px 10px !important;
+  }
+
+  /* Hide shortcut hints on mobile */
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  /* Mode selector cards on mobile */
+  .mode-selector-container {
+    padding: 24px 12px !important;
+    min-height: 100vh !important;
+    justify-content: flex-start !important;
+  }
+
+  .mode-selector-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  .mode-selector-title {
+    font-size: 2.2rem !important;
+  }
+
+  /* Problem list on mobile */
+  .problem-list-container {
+    padding: 16px 12px !important;
+  }
+
+  .problem-list-topbar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .problem-list-controls {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .problem-list-search {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .problem-list-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .tab {
+    padding: 6px 14px !important;
+    font-size: 1.15rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-brand {
+    font-size: 1.3rem !important;
+  }
+
+  .nav-actions {
+    justify-content: space-between !important;
+  }
+
+  .editor-pane {
+    min-height: 320px !important;
+    height: 350px !important;
+  }
+
+  .difficulty-badge {
+    font-size: 1rem !important;
+    padding: 0 10px !important;
+  }
+}
+
+
 

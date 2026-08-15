@@ -40,7 +40,7 @@ const ModeSelector = ({ onSelectMode, initialToken = '' }) => {
   };
 
   return (
-    <div style={{
+    <div className="mode-selector-container" style={{
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
@@ -53,10 +53,10 @@ const ModeSelector = ({ onSelectMode, initialToken = '' }) => {
       backgroundPosition: '0 0'
     }}>
       {/* Brand Header */}
-      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
           <Code2 size={42} style={{ color: 'var(--text-ink)' }} />
-          <h1 style={{ fontSize: '3rem', fontWeight: 800, fontFamily: 'var(--font-hand)', color: 'var(--text-ink)' }}>
+          <h1 className="mode-selector-title" style={{ fontSize: '3rem', fontWeight: 800, fontFamily: 'var(--font-hand)', color: 'var(--text-ink)' }}>
             LeetCompiler
           </h1>
         </div>
@@ -66,9 +66,9 @@ const ModeSelector = ({ onSelectMode, initialToken = '' }) => {
       </div>
 
       {/* Two Option Cards */}
-      <div style={{
+      <div className="mode-selector-grid" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 440px))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 440px))',
         gap: '32px',
         maxWidth: '960px',
         width: '100%'

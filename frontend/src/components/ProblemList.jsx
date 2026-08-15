@@ -14,7 +14,7 @@ const ProblemList = ({ onSelectProblem, onBackToModeSelect, userToken }) => {
   });
 
   return (
-    <div style={{
+    <div className="problem-list-container" style={{
       minHeight: '100vh',
       backgroundColor: 'var(--paper-bg)',
       backgroundImage: 'linear-gradient(var(--line-color) 1px, transparent 1px)',
@@ -23,7 +23,7 @@ const ProblemList = ({ onSelectProblem, onBackToModeSelect, userToken }) => {
       padding: '24px 32px'
     }}>
       {/* Top Bar */}
-      <div style={{
+      <div className="problem-list-topbar" style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -31,7 +31,7 @@ const ProblemList = ({ onSelectProblem, onBackToModeSelect, userToken }) => {
         borderBottom: '2px solid var(--sketch-border)',
         paddingBottom: '16px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
           <button
             onClick={onBackToModeSelect}
             className="btn-icon"
@@ -73,7 +73,7 @@ const ProblemList = ({ onSelectProblem, onBackToModeSelect, userToken }) => {
       </div>
 
       {/* Controls: Search & Difficulty Filter */}
-      <div style={{
+      <div className="problem-list-controls" style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -82,7 +82,7 @@ const ProblemList = ({ onSelectProblem, onBackToModeSelect, userToken }) => {
         flexWrap: 'wrap'
       }}>
         {/* Search */}
-        <div style={{
+        <div className="problem-list-search" style={{
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
@@ -90,7 +90,7 @@ const ProblemList = ({ onSelectProblem, onBackToModeSelect, userToken }) => {
           border: '2px solid var(--sketch-border)',
           borderRadius: '4px 8px 3px 6px / 7px 4px 6px 3px',
           padding: '8px 16px',
-          minWidth: '320px'
+          minWidth: 'min(100%, 320px)'
         }}>
           <Search size={18} style={{ color: 'var(--text-muted)' }} />
           <input
@@ -111,7 +111,7 @@ const ProblemList = ({ onSelectProblem, onBackToModeSelect, userToken }) => {
         </div>
 
         {/* Difficulty Tabs */}
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {['All', 'Easy', 'Medium', 'Hard'].map((diff) => (
             <button
               key={diff}
@@ -135,9 +135,9 @@ const ProblemList = ({ onSelectProblem, onBackToModeSelect, userToken }) => {
       </div>
 
       {/* Problem Cards Grid */}
-      <div style={{
+      <div className="problem-list-grid" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))',
         gap: '20px'
       }}>
         {filteredProblems.map((problem) => (

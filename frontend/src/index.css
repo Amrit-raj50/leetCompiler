@@ -489,42 +489,31 @@ body {
   }
 
   .editor-pane {
-    min-height: 380px !important;
-    height: 420px !important;
+    min-height: 400px !important;
+    height: auto !important;
     border: 2px solid var(--sketch-border);
     border-radius: 4px 8px 3px 6px / 7px 4px 6px 3px;
     display: flex !important;
     flex-direction: column !important;
-    background-size: 100% 24px !important;
   }
 
-  .editor-pane .pane-content {
+  .editor-pane .pane-content,
+  .editor-pane .editor-pane-content {
     flex: 1 1 auto !important;
-    height: 100% !important;
-    min-height: 300px !important;
+    height: 380px !important;
+    min-height: 380px !important;
     position: relative !important;
     overflow: hidden !important;
+    padding: 0 !important;
+    background-image: linear-gradient(var(--line-color) 1px, transparent 1px) !important;
+    background-size: 100% 26px !important;
   }
 
-  /* Ensure Monaco touch & typing inputarea works on mobile */
+  /* Ensure Monaco fills the pane and enables touch scrolling */
   .editor-pane .monaco-editor,
   .editor-pane .monaco-editor .overflow-guard {
     width: 100% !important;
     height: 100% !important;
-    touch-action: pan-y !important;
-  }
-
-  .editor-pane .monaco-editor .inputarea {
-    opacity: 0.01 !important;
-    pointer-events: auto !important;
-    -webkit-user-select: text !important;
-    user-select: text !important;
-  }
-
-  .editor-pane .monaco-editor .lines-content,
-  .editor-pane .monaco-editor .view-lines {
-    pointer-events: auto !important;
-    touch-action: pan-y !important;
   }
 
   .console-pane {

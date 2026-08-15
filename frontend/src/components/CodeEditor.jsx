@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { Code, ChevronDown, Play, Loader2 } from 'lucide-react';
-import { LANGUAGE_LABELS, MONACO_LANG_MAP, CODE_TEMPLATES } from '../constants/templates';
+import { LANGUAGE_LABELS, MONACO_LANG_MAP } from '../constants/templates';
 
 const CodeEditor = ({
   code,
@@ -19,10 +19,18 @@ const CodeEditor = ({
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (editorRef.current) {
+        editorRef.current.layout();
+      }
     };
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
   }, []);
 
   useEffect(() => {
@@ -38,6 +46,12 @@ const CodeEditor = ({
   const handleEditorMount = (editor, monaco) => {
     editorRef.current = editor;
 
+    // Trigger immediate and delayed layouts to ensure Monaco sizes properly on mobile
+    editor.layout();
+    setTimeout(() => editor.layout(), 80);
+    setTimeout(() => editor.layout(), 250);
+    setTimeout(() => editor.layout(), 600);
+
     editor.onDidScrollChange((e) => {
       if (editorContentRef.current) {
         editorContentRef.current.style.setProperty('--scroll-y', `${e.scrollTop}px`);
@@ -50,17 +64,6 @@ const CodeEditor = ({
         onRun();
       }
     });
-
-    // Ensure mobile click/touch focuses the Monaco editor and triggers keyboard
-    if (editorContentRef.current) {
-      const handleFocusEditor = () => {
-        if (editorRef.current) {
-          editorRef.current.focus();
-        }
-      };
-      editorContentRef.current.addEventListener('click', handleFocusEditor);
-      editorContentRef.current.addEventListener('touchend', handleFocusEditor, { passive: true });
-    }
   };
 
   const handleLanguageChange = (newLang) => {
@@ -171,7 +174,18 @@ const CodeEditor = ({
         </div>
       </div>
 
-      <div className="pane-content" ref={editorContentRef} style={{ padding: 0, overflow: 'hidden', flex: '1 1 auto', minHeight: '260px', height: '100%', position: 'relative' }}>
+      <div
+        className="pane-content editor-pane-content"
+        ref={editorContentRef}
+        style={{
+          padding: 0,
+          overflow: 'hidden',
+          flex: '1 1 auto',
+          height: isMobile ? '380px' : '100%',
+          minHeight: isMobile ? '360px' : '260px',
+          position: 'relative'
+        }}
+      >
         <Editor
           height="100%"
           language={monacoLanguage}
@@ -181,12 +195,12 @@ const CodeEditor = ({
           onMount={handleEditorMount}
           options={{
             minimap: { enabled: false },
-            fontSize: isMobile ? 14 : 16,
+            fontSize: isMobile ? 15 : 16,
             fontFamily: "'JetBrains Mono', monospace",
             scrollBeyondLastLine: false,
             smoothScrolling: true,
-            padding: { top: isMobile ? 8 : 16 },
-            lineHeight: isMobile ? 24 : 48,
+            padding: { top: isMobile ? 10 : 16 },
+            lineHeight: isMobile ? 26 : 48,
             renderLineHighlight: isMobile ? 'line' : 'none',
             hideCursorInOverviewRuler: true,
             overviewRulerBorder: false,
@@ -197,14 +211,15 @@ const CodeEditor = ({
             fixedOverflowWidgets: true,
             wordWrap: 'on',
             wrappingIndent: 'same',
-            glyphMargin: !isMobile,
+            glyphMargin: false,
             folding: !isMobile,
-            lineNumbersMinChars: isMobile ? 2 : 3,
-            quickSuggestions: !isMobile,
-            suggestOnTriggerCharacters: !isMobile,
-            acceptSuggestionOnEnter: isMobile ? 'off' : 'on',
-            tabCompletion: isMobile ? 'off' : 'on',
-            snippetSuggestions: isMobile ? 'none' : 'inline',
+            lineNumbers: 'on',
+            lineNumbersMinChars: 3,
+            quickSuggestions: false,
+            suggestOnTriggerCharacters: false,
+            acceptSuggestionOnEnter: 'off',
+            tabCompletion: 'off',
+            snippetSuggestions: 'none',
             autoClosingBrackets: isMobile ? 'never' : 'always',
             autoClosingQuotes: isMobile ? 'never' : 'always',
             matchBrackets: isMobile ? 'never' : 'always',
@@ -215,8 +230,8 @@ const CodeEditor = ({
               vertical: 'visible',
               horizontal: 'visible',
               useShadows: false,
-              verticalScrollbarSize: isMobile ? 6 : 8,
-              horizontalScrollbarSize: isMobile ? 6 : 8,
+              verticalScrollbarSize: 8,
+              horizontalScrollbarSize: 8,
               alwaysConsumeMouseWheel: false,
             }
           }}

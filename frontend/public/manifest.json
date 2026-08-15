@@ -1,0 +1,19 @@
+{
+  "name": "LeetCompiler - Sketchbook Code Editor",
+  "short_name": "LeetCompiler",
+  "description": "Multi-language code compiler, notebook IDE, and LeetCode revision workspace.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fdfbf7",
+  "theme_color": "#fdfbf7",
+  "categories": ["education", "developer", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

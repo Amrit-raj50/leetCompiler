@@ -143,6 +143,7 @@ const CodeEditor = ({
               backgroundImage: 'linear-gradient(var(--line-color) 1px, transparent 1px)',
               backgroundSize: '100% var(--grid-size)',
               backgroundPosition: '0 -1px',
+              backgroundAttachment: 'local',
             }}>
               {Object.entries(LANGUAGE_LABELS).map(([key, label]) => (
                 <div 

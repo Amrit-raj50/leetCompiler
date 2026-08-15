@@ -215,6 +215,7 @@ const CodeEditor = ({
             folding: !isMobile,
             lineNumbers: 'on',
             lineNumbersMinChars: 3,
+            lineDecorationsWidth: isMobile ? 10 : 24, /* Pushes code past the 60px red margin line */
             quickSuggestions: false,
             suggestOnTriggerCharacters: false,
             acceptSuggestionOnEnter: 'off',

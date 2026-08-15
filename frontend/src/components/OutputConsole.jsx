@@ -47,7 +47,7 @@ const OutputConsole = ({
   };
 
   return (
-    <div className="console-pane sketch-box" style={{ borderRadius: '0 0 4px 4px', borderTop: 'none' }}>
+    <div className="console-pane">
       <div className="pane-header" style={{ justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Terminal size={20} />

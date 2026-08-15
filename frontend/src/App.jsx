@@ -292,7 +292,7 @@ function App() {
               {/* Center Spiral Binding */}
               <div className="spiral-binding">
                 {Array.from({ length: 14 }).map((_, i) => (
-                  <div key={i} className="spiral-ring" />
+                  <div key={i} className="ring" />
                 ))}
               </div>
 

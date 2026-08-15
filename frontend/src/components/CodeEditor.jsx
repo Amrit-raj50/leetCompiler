@@ -41,6 +41,17 @@ const CodeEditor = ({
         onRun();
       }
     });
+
+    // Ensure mobile click/touch focuses the Monaco editor and triggers keyboard
+    if (editorContentRef.current) {
+      const handleFocusEditor = () => {
+        if (editorRef.current) {
+          editorRef.current.focus();
+        }
+      };
+      editorContentRef.current.addEventListener('click', handleFocusEditor);
+      editorContentRef.current.addEventListener('touchend', handleFocusEditor, { passive: true });
+    }
   };
 
   const handleLanguageChange = (newLang) => {
@@ -151,7 +162,7 @@ const CodeEditor = ({
         </div>
       </div>
 
-      <div className="pane-content" ref={editorContentRef} style={{ padding: 0, overflow: 'hidden', flex: 1 }}>
+      <div className="pane-content" ref={editorContentRef} style={{ padding: 0, overflow: 'hidden', flex: '1 1 auto', minHeight: '260px', height: '100%', position: 'relative' }}>
         <Editor
           height="100%"
           language={monacoLanguage}
@@ -171,7 +182,18 @@ const CodeEditor = ({
             hideCursorInOverviewRuler: true,
             overviewRulerBorder: false,
             automaticLayout: true,
-            tabSize: 2
+            tabSize: 2,
+            readOnly: false,
+            domReadOnly: false,
+            fixedOverflowWidgets: true,
+            wordWrap: 'on',
+            scrollbar: {
+              vertical: 'visible',
+              horizontal: 'visible',
+              useShadows: false,
+              verticalScrollbarSize: 8,
+              horizontalScrollbarSize: 8
+            }
           }}
         />
       </div>

@@ -55,8 +55,8 @@ const OutputConsole = ({
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {/* Mode Indicator Badge */}
-          {execResult?.mode && (
+          {/* Mode Indicator Badge (Only for Integrated Mode) */}
+          {isIntegrated && (
             <span
               style={{
                 fontSize: '0.85rem',
@@ -66,13 +66,13 @@ const OutputConsole = ({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '4px',
-                backgroundColor: isIntegrated ? 'rgba(34, 197, 94, 0.1)' : 'rgba(0,0,0,0.06)',
-                border: `1px solid ${isIntegrated ? '#22c55e' : 'var(--sketch-border)'}`,
-                color: isIntegrated ? '#15803d' : 'var(--text-muted)'
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                border: '1px solid #22c55e',
+                color: '#15803d'
               }}
             >
-              {isIntegrated ? <Zap size={13} /> : <Unlock size={13} />}
-              {isIntegrated ? 'Integrated Mode' : 'Standalone Mode'}
+              <Zap size={13} />
+              <span>Integrated Mode</span>
             </span>
           )}
 
@@ -92,23 +92,25 @@ const OutputConsole = ({
         </div>
       </div>
 
-      {/* Console Tabs */}
-      <div className="tabs-container" style={{ borderBottom: '2px solid var(--sketch-border)' }}>
-        <button
-          className={`tab ${activeTab === 'testcases' ? 'active' : ''}`}
-          onClick={() => setActiveTab('testcases')}
-        >
-          Testcases
-        </button>
-        <button
-          className={`tab ${activeTab === 'output' ? 'active' : ''}`}
-          onClick={() => setActiveTab('output')}
-        >
-          Test Result
-          {execResult?.allPassed && <span style={{ marginLeft: '6px', color: '#16a34a' }}>●</span>}
-          {execResult?.error && <span style={{ marginLeft: '6px', color: '#dc2626' }}>●</span>}
-        </button>
-      </div>
+      {/* Console Tabs (Only show Testcases tab if testCases are present) */}
+      {testCases.length > 0 ? (
+        <div className="tabs-container" style={{ borderBottom: '2px solid var(--sketch-border)' }}>
+          <button
+            className={`tab ${activeTab === 'testcases' ? 'active' : ''}`}
+            onClick={() => setActiveTab('testcases')}
+          >
+            Testcases
+          </button>
+          <button
+            className={`tab ${activeTab === 'output' ? 'active' : ''}`}
+            onClick={() => setActiveTab('output')}
+          >
+            Test Result
+            {execResult?.allPassed && <span style={{ marginLeft: '6px', color: '#16a34a' }}>●</span>}
+            {execResult?.error && <span style={{ marginLeft: '6px', color: '#dc2626' }}>●</span>}
+          </button>
+        </div>
+      ) : null}
 
       <div className="pane-content" style={{ padding: '16px' }}>
         {isRunning ? (

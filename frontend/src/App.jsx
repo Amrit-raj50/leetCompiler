@@ -150,8 +150,8 @@ function App() {
     setRunCount(newCount);
     localStorage.setItem('leetcompiler_run_count', String(newCount));
 
-    // Pop up feedback modal on every 10th run milestone
-    if (newCount > 0 && newCount % 10 === 0) {
+    // Pop up feedback modal on every 5th run milestone
+    if (newCount > 0 && newCount % 5 === 0) {
       setTimeout(() => {
         setIsFeedbackOpen(true);
       }, 1500);

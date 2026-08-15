@@ -85,26 +85,28 @@ const Navbar = ({
           <span>LeetCompiler</span>
         </div>
 
-        {/* Mode Tag */}
-        <span
-          className="mode-tag"
-          style={{
-            fontSize: '0.85rem',
-            fontFamily: 'var(--font-hand)',
-            padding: '2px 10px',
-            borderRadius: '12px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '4px',
-            backgroundColor: isIntegrated ? 'rgba(34, 197, 94, 0.12)' : 'rgba(2, 132, 199, 0.12)',
-            border: `1.5px solid ${isIntegrated ? '#16a34a' : '#0284c7'}`,
-            color: isIntegrated ? '#15803d' : '#0369a1',
-            fontWeight: 700
-          }}
-        >
-          {isIntegrated ? <Zap size={14} /> : <Unlock size={14} />}
-          <span>{isIntegrated ? `Integrated: ${currentProblem?.title || 'Problem'}` : 'Standalone Compiler'}</span>
-        </span>
+        {/* Mode Tag (Only for Integrated Mode) */}
+        {isIntegrated && (
+          <span
+            className="mode-tag"
+            style={{
+              fontSize: '0.85rem',
+              fontFamily: 'var(--font-hand)',
+              padding: '2px 10px',
+              borderRadius: '12px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              backgroundColor: 'rgba(34, 197, 94, 0.12)',
+              border: '1.5px solid #16a34a',
+              color: '#15803d',
+              fontWeight: 700
+            }}
+          >
+            <Zap size={14} />
+            <span>{`Integrated: ${currentProblem?.title || 'Problem'}`}</span>
+          </span>
+        )}
 
         {/* Quick Problem Switcher for Integrated Mode */}
         {isIntegrated && (
@@ -180,39 +182,42 @@ const Navbar = ({
           <span>Feedback</span>
         </button>
 
-        {/* Save to DB Button */}
-        <button
-          onClick={onSave}
-          disabled={isSaving || isRunning}
-          className="btn-icon"
-          title="Save code to database"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '1rem',
-            fontFamily: 'var(--font-hand)',
-            padding: '4px 12px',
-            border: '1.5px solid var(--sketch-border)',
-            borderRadius: '4px',
-            backgroundColor: 'rgba(255,255,255,0.7)',
-            cursor: (isSaving || isRunning) ? 'not-allowed' : 'pointer',
-            opacity: (isSaving || isRunning) ? 0.6 : 1
-          }}
-        >
-          {isSaving ? (
-            <Loader2 size={16} className="animate-spin" />
-          ) : (
-            <Save size={16} />
-          )}
-          <span>{isSaving ? 'Saving...' : 'Save Code'}</span>
-        </button>
+        {/* Save to DB Button (Only in Integrated Mode) */}
+        {isIntegrated && (
+          <button
+            onClick={onSave}
+            disabled={isSaving || isRunning}
+            className="btn-icon"
+            title="Save code to database"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '1rem',
+              fontFamily: 'var(--font-hand)',
+              padding: '4px 12px',
+              border: '1.5px solid var(--sketch-border)',
+              borderRadius: '4px',
+              backgroundColor: 'rgba(255,255,255,0.7)',
+              cursor: (isSaving || isRunning) ? 'not-allowed' : 'pointer',
+              opacity: (isSaving || isRunning) ? 0.6 : 1
+            }}
+          >
+            {isSaving ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Save size={16} />
+            )}
+            <span>{isSaving ? 'Saving...' : 'Save Code'}</span>
+          </button>
+        )}
 
+        {/* Run Button */}
         <button
           className="btn-icon btn-run"
           onClick={onRun}
           disabled={isRunning}
-          title="Run tests and execution"
+          title="Run code execution"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -229,25 +234,28 @@ const Navbar = ({
           <span>{isRunning ? 'Running...' : 'Run'}</span>
         </button>
 
-        <button
-          className="btn btn-submit"
-          onClick={onRun}
-          disabled={isRunning}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            cursor: isRunning ? 'not-allowed' : 'pointer',
-            opacity: isRunning ? 0.7 : 1
-          }}
-        >
-          {isRunning ? (
-            <Loader2 size={18} className="animate-spin" />
-          ) : (
-            <Send size={18} />
-          )}
-          <span>{isRunning ? 'Executing...' : 'Execute'}</span>
-        </button>
+        {/* Execute Button (Only in Integrated Mode) */}
+        {isIntegrated && (
+          <button
+            className="btn btn-submit"
+            onClick={onRun}
+            disabled={isRunning}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: isRunning ? 'not-allowed' : 'pointer',
+              opacity: isRunning ? 0.7 : 1
+            }}
+          >
+            {isRunning ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <Send size={18} />
+            )}
+            <span>{isRunning ? 'Executing...' : 'Execute'}</span>
+          </button>
+        )}
       </div>
     </nav>
   );

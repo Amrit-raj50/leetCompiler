@@ -85,29 +85,6 @@ const Navbar = ({
           <span>LeetCompiler</span>
         </div>
 
-        {/* Mode Tag (Only for Integrated Mode) */}
-        {isIntegrated && (
-          <span
-            className="mode-tag"
-            style={{
-              fontSize: '0.85rem',
-              fontFamily: 'var(--font-hand)',
-              padding: '2px 10px',
-              borderRadius: '12px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              backgroundColor: 'rgba(34, 197, 94, 0.12)',
-              border: '1.5px solid #16a34a',
-              color: '#15803d',
-              fontWeight: 700
-            }}
-          >
-            <Zap size={14} />
-            <span>{`Integrated: ${currentProblem?.title || 'Problem'}`}</span>
-          </span>
-        )}
-
         {/* Quick Problem Switcher for Integrated Mode */}
         {isIntegrated && (
           <button

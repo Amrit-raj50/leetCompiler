@@ -1,10 +1,26 @@
 import axios from 'axios';
 
-// Smart URL normalization to handle any trailing slash or base URL variations
+// Smart URL resolver: Automatically targets production Render backend on deployed sites (e.g. Vercel)
 const getBaseApiUrl = () => {
-  let url = import.meta.env.VITE_COMPILER_API_URL || 'http://localhost:5001/api/compiler';
-  url = url.trim().replace(/\/+$/, ''); // Remove trailing slashes
-  if (!url.endsWith('/api/compiler')) {
+  let url = import.meta.env.VITE_COMPILER_API_URL;
+
+  // If on a remote deployment (e.g. *.vercel.app) or no env provided, default to live cloud backend
+  const isBrowser = typeof window !== 'undefined';
+  const isLocalHost = isBrowser && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1'
+  );
+
+  if (!url || (!isLocalHost && url.includes('localhost'))) {
+    if (!isLocalHost) {
+      url = 'https://leetcompiler.onrender.com/api/compiler';
+    } else {
+      url = url || 'http://localhost:5001/api/compiler';
+    }
+  }
+
+  url = url.trim().replace(/\/+$/, '');
+  if (!url.endsWith('/api/compiler') && !url.endsWith('/api')) {
     url = `${url}/api/compiler`;
   }
   return url;

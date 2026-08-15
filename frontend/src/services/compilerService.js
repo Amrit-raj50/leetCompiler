@@ -101,3 +101,19 @@ export const getSavedCodeApi = async (questionSlug) => {
   const response = await axios.get(url, { headers });
   return response.data;
 };
+
+export const submitFeedbackApi = async ({ name, rating, mode, comment, device }) => {
+  const response = await axios.post(`${API_URL}/feedback`, {
+    name,
+    rating,
+    mode,
+    comment,
+    device: device || (typeof window !== 'undefined' && window.innerWidth <= 768 ? 'Mobile Phone' : 'Desktop / Laptop')
+  });
+  return response.data;
+};
+
+export const getFeedbackListApi = async () => {
+  const response = await axios.get(`${API_URL}/feedback`);
+  return response.data;
+};

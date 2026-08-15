@@ -6,6 +6,7 @@ import CodeEditor from './components/CodeEditor';
 import OutputConsole from './components/OutputConsole';
 import ModeSelector from './components/ModeSelector';
 import ProblemList from './components/ProblemList';
+import FeedbackModal from './components/FeedbackModal';
 import { runCodeApi, saveCodeApi } from './services/compilerService';
 import { parseFrontendError } from './utils/errorParser';
 import { PROBLEMS, STANDALONE_DEFAULT_CODE } from './constants/questions';
@@ -27,6 +28,12 @@ function App() {
   const [isRunning, setIsRunning] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeConsoleTab, setActiveConsoleTab] = useState('output');
+
+  // Feedback on every 10 runs
+  const [runCount, setRunCount] = useState(() => {
+    return parseInt(localStorage.getItem('leetcompiler_run_count') || '0', 10);
+  });
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   // Handle Mode Selection from Landing Screen
   const handleSelectMode = (targetView, token = '') => {
@@ -137,6 +144,18 @@ function App() {
 
     const questionSlug = mode === 'integrated' ? currentProblem.slug : 'scratchpad';
     const testCases = mode === 'integrated' ? currentProblem.testCases : [];
+    
+    // Track execution count for feedback milestone
+    const newCount = runCount + 1;
+    setRunCount(newCount);
+    localStorage.setItem('leetcompiler_run_count', String(newCount));
+
+    // Pop up feedback modal on every 10th run milestone
+    if (newCount > 0 && newCount % 10 === 0) {
+      setTimeout(() => {
+        setIsFeedbackOpen(true);
+      }, 1500);
+    }
 
     try {
       const result = await runCodeApi({
@@ -207,6 +226,14 @@ function App() {
     <div className="app-container">
       <Toaster position="top-right" />
 
+      {/* Feedback Modal on every 10th run */}
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+        mode={mode}
+        runCount={runCount}
+      />
+
       {/* 1. Landing Screen: Mode Selector */}
       {currentView === 'mode-select' && (
         <ModeSelector
@@ -224,7 +251,7 @@ function App() {
         />
       )}
 
-      {/* 3. Editor View (Integrated vs. Standalone) */}
+      {/* 3. Editor Workspace Screen */}
       {currentView === 'editor' && (
         <>
           <Navbar
@@ -234,21 +261,27 @@ function App() {
             onGoHome={() => setCurrentView('mode-select')}
             onRun={handleRunCode}
             onSave={handleSaveCode}
+            onOpenFeedback={() => setIsFeedbackOpen(true)}
             isRunning={isRunning}
             isSaving={isSaving}
           />
 
           {mode === 'integrated' ? (
-            /* Integrated Mode: 2-Page Spiral Notebook with Problem Description */
+            /* Integrated Mode: 2-Page Spiral Notebook Workspace */
             <div className="workspace">
-              <ProblemDescription problem={currentProblem} />
+              {/* Left Page: Problem Description */}
+              <div className="left-pane">
+                <ProblemDescription problem={currentProblem} />
+              </div>
 
+              {/* Center Spiral Binding */}
               <div className="spiral-binding">
-                {Array.from({ length: 40 }).map((_, i) => (
-                  <div key={i} className="ring"></div>
+                {Array.from({ length: 14 }).map((_, i) => (
+                  <div key={i} className="spiral-ring" />
                 ))}
               </div>
 
+              {/* Right Page: Split Monaco Editor + Console */}
               <div className="right-pane">
                 <CodeEditor
                   code={code}

@@ -1,9 +1,15 @@
 export const CODE_TEMPLATES = {
-  cpp: `class Solution {
+  cpp: `#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_map>
+using namespace std;
+
+class Solution {
 public:
     vector<int> twoSum(vector<int>& nums, int target) {
         // Write your C++ code here
-        
+        return {};
     }
 };`,
   javascript: `/**
@@ -29,7 +35,11 @@ console.log(twoSum([2, 7, 11, 15], 9));`,
         return new int[]{};
     }
 }`,
-  c: `/**
+  c: `#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+
+/**
  * Note: The returned array must be malloced, assume caller calls free().
  */
 int* twoSum(int* nums, int numsSize, int target, int* returnSize) {

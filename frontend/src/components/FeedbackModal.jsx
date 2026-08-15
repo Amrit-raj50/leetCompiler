@@ -3,7 +3,7 @@ import { Star, MessageSquareHeart, X, Send, Loader2, Sparkles, CheckCircle2 } fr
 import toast from 'react-hot-toast';
 import { submitFeedbackApi } from '../services/compilerService';
 
-const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 10 }) => {
+const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) => {
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [name, setName] = useState('');
@@ -44,20 +44,33 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 10 }) 
     }
   };
 
+  const handleDismiss = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    onClose();
+  };
+
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.45)',
-      backdropFilter: 'blur(3px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 9999,
-      padding: '16px'
-    }}>
+    <div
+      onClick={handleDismiss}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 99999,
+        padding: '16px',
+        touchAction: 'manipulation'
+      }}
+    >
       <div
         className="sketch-box"
+        onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: 'var(--paper-bg)',
           backgroundImage: 'linear-gradient(var(--line-color) 1px, transparent 1px)',
@@ -66,20 +79,32 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 10 }) 
           width: '100%',
           padding: '28px 24px',
           borderRadius: '4px 8px 3px 6px / 7px 4px 6px 3px',
-          boxShadow: '0 12px 36px rgba(0,0,0,0.2)',
+          boxShadow: '0 16px 40px rgba(0,0,0,0.25)',
           position: 'relative'
         }}
       >
-        {/* Close Button */}
+        {/* Top-Right Circular Close / Cancel Button */}
         <button
-          onClick={onClose}
+          type="button"
+          onClick={handleDismiss}
           className="btn-icon"
+          title="Close / Cancel"
+          aria-label="Close"
           style={{
             position: 'absolute',
-            top: '14px',
-            right: '14px',
-            padding: '4px',
-            opacity: 0.7
+            top: '12px',
+            right: '12px',
+            width: '36px',
+            height: '36px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 0,
+            border: '1.5px solid var(--sketch-border)',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(255,255,255,0.85)',
+            cursor: 'pointer',
+            zIndex: 10
           }}
         >
           <X size={20} />
@@ -209,16 +234,17 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 10 }) 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleDismiss}
                 disabled={isSubmitting}
                 className="btn-icon"
                 style={{
                   padding: '6px 14px',
                   fontFamily: 'var(--font-hand)',
-                  fontSize: '1.05rem'
+                  fontSize: '1.05rem',
+                  cursor: 'pointer'
                 }}
               >
-                Skip for Now
+                Skip / Cancel
               </button>
 
               <button

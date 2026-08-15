@@ -171,24 +171,26 @@ function App() {
       setOutput(outputText);
 
       if (result?.allPassed || (mode === 'standalone' && !result?.error)) {
-        toast.success(result?.message || '🎉 Execution successful!', {
+        toast.success('🎉 Execution completed successfully!', {
           id: 'run-status',
           icon: '✅',
+          duration: 2500,
           style: {
             fontFamily: 'var(--font-hand)',
-            fontSize: '1.1rem',
+            fontSize: '1rem',
             border: '2px solid #16a34a',
             background: 'var(--paper-bg)',
             color: 'var(--text-ink)'
           }
         });
       } else if (result?.error || result?.allPassed === false) {
-        toast.error(result?.error || '❌ Some test cases failed', {
+        toast.error(result?.diagnostics?.type || '❌ Execution failed. See console below.', {
           id: 'run-status',
           icon: '❌',
+          duration: 2500,
           style: {
             fontFamily: 'var(--font-hand)',
-            fontSize: '1.1rem',
+            fontSize: '1rem',
             border: '2px solid #dc2626',
             background: 'var(--paper-bg)',
             color: 'var(--text-ink)'
@@ -207,8 +209,9 @@ function App() {
         diagnostics
       });
       
-      toast.error(`Execution failed: ${diagnostics?.type || errorMsg}`, {
+      toast.error(diagnostics?.type || '❌ Execution error. See details below.', {
         id: 'run-status',
+        duration: 2500,
         style: {
           fontFamily: 'var(--font-hand)',
           fontSize: '1rem',
@@ -224,7 +227,19 @@ function App() {
 
   return (
     <div className="app-container">
-      <Toaster position="top-right" />
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: {
+            maxWidth: '360px',
+            fontSize: '0.95rem',
+            fontFamily: 'var(--font-hand)',
+            background: 'var(--paper-bg)',
+            border: '1.5px solid var(--sketch-border)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+          }
+        }}
+      />
 
       {/* Feedback Modal on every 10th run */}
       <FeedbackModal

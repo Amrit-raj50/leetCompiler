@@ -7,6 +7,7 @@ import OutputConsole from './components/OutputConsole';
 import ModeSelector from './components/ModeSelector';
 import ProblemList from './components/ProblemList';
 import { runCodeApi, saveCodeApi } from './services/compilerService';
+import { parseFrontendError } from './utils/errorParser';
 import { PROBLEMS, STANDALONE_DEFAULT_CODE } from './constants/questions';
 import { CODE_TEMPLATES } from './constants/templates';
 
@@ -177,10 +178,17 @@ function App() {
       }
     } catch (error) {
       const errorMsg = error.response?.data?.error || error.response?.data?.message || error.message || 'Failed to communicate with compiler backend';
-      setOutput(`❌ Execution Error: ${errorMsg}\n\n💡 Tip: Make sure the compiler backend is running on port 5001 (http://localhost:5001/api/compiler/run)`);
-      setExecResult({ error: errorMsg, allPassed: false, mode });
+      const diagnostics = error.response?.data?.diagnostics || parseFrontendError(error, lang, code);
       
-      toast.error(`Error: ${errorMsg}`, {
+      setOutput(errorMsg);
+      setExecResult({
+        error: errorMsg,
+        allPassed: false,
+        mode,
+        diagnostics
+      });
+      
+      toast.error(`Execution failed: ${diagnostics?.type || errorMsg}`, {
         id: 'run-status',
         style: {
           fontFamily: 'var(--font-hand)',

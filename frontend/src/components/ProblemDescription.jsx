@@ -1,36 +1,79 @@
 import React from 'react';
-import { AlignLeft } from 'lucide-react';
+import { AlignLeft, Tag } from 'lucide-react';
 
-const ProblemDescription = () => {
+const ProblemDescription = ({ problem }) => {
+  if (!problem) {
+    return (
+      <div className="pane left-pane">
+        <div className="pane-header">
+          <AlignLeft />
+          <span>Description</span>
+        </div>
+        <div className="pane-content prose" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+          Select a problem to view description
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pane left-pane">
-      <div className="pane-header">
-        <AlignLeft />
-        <span>Description</span>
+      <div className="pane-header" style={{ justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <AlignLeft size={20} />
+          <span>Description</span>
+        </div>
+        {problem.tags && (
+          <div style={{ display: 'flex', gap: '4px' }}>
+            {problem.tags.map((tag, i) => (
+              <span key={i} style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontFamily: 'var(--font-hand)' }}>
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
       <div className="pane-content prose">
-        <h1>1. Two Sum</h1>
-        <div className="difficulty-badge">Easy</div>
+        <h1>{problem.title}</h1>
+        <div
+          className="difficulty-badge"
+          style={{
+            color: problem.difficultyColor || '#16a34a',
+            borderColor: problem.difficultyColor || '#16a34a'
+          }}
+        >
+          {problem.difficulty}
+        </div>
         
-        <p>Given an array of integers <code>nums</code> and an integer <code>target</code>, return indices of the two numbers such that they add up to <code>target</code>.</p>
-        
-        <p>You may assume that each input would have <strong>exactly one solution</strong>, and you may not use the same element twice.</p>
-        
-        <p>You can return the answer in any order.</p>
+        {/* Render description paragraphs */}
+        <div
+          style={{ marginTop: '12px', lineHeight: 'var(--grid-size)' }}
+          dangerouslySetInnerHTML={{ __html: problem.description }}
+        />
 
-        <h3 style={{ marginTop: '24px', marginBottom: '8px', fontSize: '1.1rem' }}>Example 1:</h3>
-        <pre>
-          <strong>Input:</strong> nums = [2,7,11,15], target = 9<br />
-          <strong>Output:</strong> [0,1]<br />
-          <strong>Explanation:</strong> Because nums[0] + nums[1] == 9, we return [0, 1].
-        </pre>
+        {/* Examples */}
+        {problem.examples && problem.examples.map((ex, idx) => (
+          <div key={idx} style={{ marginTop: '16px' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Example {idx + 1}:</h3>
+            <pre style={{ margin: '4px 0' }}>
+              <strong>Input:</strong> {ex.input}<br />
+              <strong>Output:</strong> {ex.output}<br />
+              {ex.explanation && <><strong>Explanation:</strong> {ex.explanation}</>}
+            </pre>
+          </div>
+        ))}
 
-        <h3 style={{ marginTop: '24px', marginBottom: '8px', fontSize: '1.1rem' }}>Constraints:</h3>
-        <ul style={{ paddingLeft: '20px', color: 'var(--text-secondary)' }}>
-          <li><code>2 &lt;= nums.length &lt;= 10<sup>4</sup></code></li>
-          <li><code>-10<sup>9</sup> &lt;= nums[i] &lt;= 10<sup>9</sup></code></li>
-          <li><code>-10<sup>9</sup> &lt;= target &lt;= 10<sup>9</sup></code></li>
-        </ul>
+        {/* Constraints */}
+        {problem.constraints && problem.constraints.length > 0 && (
+          <div style={{ marginTop: '16px', marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Constraints:</h3>
+            <ul style={{ paddingLeft: '20px', color: 'var(--text-ink)' }}>
+              {problem.constraints.map((c, i) => (
+                <li key={i} dangerouslySetInnerHTML={{ __html: `<code>${c}</code>` }} />
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

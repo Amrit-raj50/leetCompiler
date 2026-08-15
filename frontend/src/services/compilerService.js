@@ -1,6 +1,16 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_COMPILER_API_URL || 'http://localhost:5001/api/compiler';
+// Smart URL normalization to handle any trailing slash or base URL variations
+const getBaseApiUrl = () => {
+  let url = import.meta.env.VITE_COMPILER_API_URL || 'http://localhost:5001/api/compiler';
+  url = url.trim().replace(/\/+$/, ''); // Remove trailing slashes
+  if (!url.endsWith('/api/compiler')) {
+    url = `${url}/api/compiler`;
+  }
+  return url;
+};
+
+const API_URL = getBaseApiUrl();
 
 export const runCodeApi = async ({ code, language, questionSlug = 'two-sum', testCases = [] }) => {
   const token = localStorage.getItem('token') || '';

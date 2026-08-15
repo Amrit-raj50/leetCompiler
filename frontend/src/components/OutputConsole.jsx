@@ -112,7 +112,7 @@ const OutputConsole = ({
         </div>
       ) : null}
 
-      <div className="pane-content" style={{ padding: '16px' }}>
+      <div className="pane-content">
         {isRunning ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px', minHeight: '140px' }}>
             <Loader2 size={32} className="animate-spin" style={{ color: 'var(--accent)' }} />
@@ -130,13 +130,14 @@ const OutputConsole = ({
                 ) : (
                   <>
                     {/* Case Buttons */}
-                    <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', height: 'var(--grid-size)', alignItems: 'center' }}>
                       {testCases.map((tc, index) => (
                         <button
                           key={index}
                           onClick={() => setSelectedCaseIndex(index)}
                           style={{
-                            padding: '4px 12px',
+                            padding: '0 12px',
+                            height: '32px',
                             fontFamily: 'var(--font-hand)',
                             fontSize: '1rem',
                             border: '1.5px solid var(--sketch-border)',
@@ -154,42 +155,36 @@ const OutputConsole = ({
 
                     {/* Active Test Case Inputs */}
                     {currentCase && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
                         {Object.entries(currentCase.input || {}).map(([key, val]) => (
-                          <div key={key}>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '4px', fontFamily: 'var(--font-hand)' }}>
+                          <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '8px', lineHeight: 'var(--grid-size)' }}>
+                            <span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontFamily: 'var(--font-hand)' }}>
                               {key} =
-                            </div>
-                            <div style={{
-                              padding: '8px 12px',
-                              backgroundColor: 'rgba(0,0,0,0.03)',
-                              border: '1px solid var(--sketch-border)',
-                              borderRadius: '4px',
+                            </span>
+                            <span style={{
                               fontFamily: 'var(--font-mono)',
-                              fontSize: '0.95rem'
+                              fontSize: '1.1rem',
+                              color: 'var(--text-ink)',
+                              fontWeight: 600
                             }}>
                               {JSON.stringify(val)}
-                            </div>
+                            </span>
                           </div>
                         ))}
 
                         {currentCase.expectedOutput !== undefined && (
-                          <div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '4px', fontFamily: 'var(--font-hand)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', lineHeight: 'var(--grid-size)' }}>
+                            <span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontFamily: 'var(--font-hand)' }}>
                               Expected Output =
-                            </div>
-                            <div style={{
-                              padding: '8px 12px',
-                              backgroundColor: 'rgba(0,0,0,0.03)',
-                              border: '1px solid var(--sketch-border)',
-                              borderRadius: '4px',
+                            </span>
+                            <span style={{
                               fontFamily: 'var(--font-mono)',
-                              fontSize: '0.95rem',
+                              fontSize: '1.1rem',
                               color: '#16a34a',
                               fontWeight: 600
                             }}>
                               {JSON.stringify(currentCase.expectedOutput)}
-                            </div>
+                            </span>
                           </div>
                         )}
                       </div>

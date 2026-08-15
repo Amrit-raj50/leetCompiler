@@ -47,15 +47,15 @@ const ProblemDescription = ({ problem }) => {
         
         {/* Render description paragraphs */}
         <div
-          style={{ marginTop: '12px', lineHeight: 'var(--grid-size)' }}
+          style={{ marginTop: 'var(--grid-size)', lineHeight: 'var(--grid-size)' }}
           dangerouslySetInnerHTML={{ __html: problem.description }}
         />
 
         {/* Examples */}
         {problem.examples && problem.examples.map((ex, idx) => (
-          <div key={idx} style={{ marginTop: '16px' }}>
+          <div key={idx} style={{ marginTop: 'var(--grid-size)' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Example {idx + 1}:</h3>
-            <pre style={{ margin: '4px 0' }}>
+            <pre style={{ margin: 0 }}>
               <strong>Input:</strong> {ex.input}<br />
               <strong>Output:</strong> {ex.output}<br />
               {ex.explanation && <><strong>Explanation:</strong> {ex.explanation}</>}
@@ -65,7 +65,7 @@ const ProblemDescription = ({ problem }) => {
 
         {/* Constraints */}
         {problem.constraints && problem.constraints.length > 0 && (
-          <div style={{ marginTop: '16px', marginBottom: '24px' }}>
+          <div style={{ marginTop: 'var(--grid-size)', marginBottom: 'var(--grid-size)' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Constraints:</h3>
             <ul style={{ paddingLeft: '20px', color: 'var(--text-ink)' }}>
               {problem.constraints.map((c, i) => (

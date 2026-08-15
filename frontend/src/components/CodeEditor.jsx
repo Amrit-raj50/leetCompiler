@@ -12,9 +12,18 @@ const CodeEditor = ({
   isRunning = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
   const dropdownRef = useRef(null);
   const editorContentRef = useRef(null);
   const editorRef = useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -172,13 +181,13 @@ const CodeEditor = ({
           onMount={handleEditorMount}
           options={{
             minimap: { enabled: false },
-            fontSize: 16,
+            fontSize: isMobile ? 14 : 16,
             fontFamily: "'JetBrains Mono', monospace",
             scrollBeyondLastLine: false,
             smoothScrolling: true,
-            padding: { top: 16 },
-            lineHeight: 48,
-            renderLineHighlight: 'none',
+            padding: { top: isMobile ? 8 : 16 },
+            lineHeight: isMobile ? 24 : 48,
+            renderLineHighlight: isMobile ? 'line' : 'none',
             hideCursorInOverviewRuler: true,
             overviewRulerBorder: false,
             automaticLayout: true,
@@ -187,12 +196,28 @@ const CodeEditor = ({
             domReadOnly: false,
             fixedOverflowWidgets: true,
             wordWrap: 'on',
+            wrappingIndent: 'same',
+            glyphMargin: !isMobile,
+            folding: !isMobile,
+            lineNumbersMinChars: isMobile ? 2 : 3,
+            quickSuggestions: !isMobile,
+            suggestOnTriggerCharacters: !isMobile,
+            acceptSuggestionOnEnter: isMobile ? 'off' : 'on',
+            tabCompletion: isMobile ? 'off' : 'on',
+            snippetSuggestions: isMobile ? 'none' : 'inline',
+            autoClosingBrackets: isMobile ? 'never' : 'always',
+            autoClosingQuotes: isMobile ? 'never' : 'always',
+            matchBrackets: isMobile ? 'never' : 'always',
+            cursorStyle: 'line',
+            cursorWidth: 2,
+            cursorBlinking: 'blink',
             scrollbar: {
               vertical: 'visible',
               horizontal: 'visible',
               useShadows: false,
-              verticalScrollbarSize: 8,
-              horizontalScrollbarSize: 8
+              verticalScrollbarSize: isMobile ? 6 : 8,
+              horizontalScrollbarSize: isMobile ? 6 : 8,
+              alwaysConsumeMouseWheel: false,
             }
           }}
         />

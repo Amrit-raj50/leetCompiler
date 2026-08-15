@@ -495,6 +495,7 @@ body {
     border-radius: 4px 8px 3px 6px / 7px 4px 6px 3px;
     display: flex !important;
     flex-direction: column !important;
+    background-size: 100% 24px !important;
   }
 
   .editor-pane .pane-content {

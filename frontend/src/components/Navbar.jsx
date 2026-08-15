@@ -60,27 +60,19 @@ const Navbar = ({
     <nav className="navbar">
       {/* Brand & Navigation */}
       <div className="nav-left" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-        <button
+        <div 
+          className="nav-brand sketch-box" 
+          style={{ 
+            cursor: 'pointer', 
+            padding: '4px 16px',
+            backgroundColor: 'var(--paper-bg)',
+            transition: 'transform 0.1s ease'
+          }} 
           onClick={onGoHome}
-          className="btn-icon"
-          title="Back to Mode Selector"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '1rem',
-            fontFamily: 'var(--font-hand)',
-            padding: '4px 10px',
-            border: '1.5px solid var(--sketch-border)',
-            borderRadius: '4px',
-            backgroundColor: 'rgba(255,255,255,0.6)'
-          }}
+          title="Back to Home"
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          <Home size={16} />
-          <span>Home</span>
-        </button>
-
-        <div className="nav-brand" style={{ cursor: 'pointer' }} onClick={onGoHome}>
           <Code2 size={28} />
           <span>LeetCompiler</span>
         </div>

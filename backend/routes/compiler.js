@@ -1,6 +1,7 @@
 import express from 'express';
 import { runCode } from '../services/compilerService.js';
 import { updateRevisionStatus, saveUserCode, getSavedCodes } from '../services/revisionService.js';
+import { saveFeedbackAndSyncReadme, getRecentFeedbacks } from '../services/feedbackService.js';
 import { optionalAuth, requireAuth } from '../middleware/auth.js';
 import { isDbConnected } from '../config/db.js';
 
@@ -149,6 +150,43 @@ router.post('/run-integrated', requireAuth, async (req, res) => {
       success: false,
       error: error.message || 'Internal compiler error',
     });
+  }
+});
+
+/**
+ * 💬 Route 5: Submit Feedback & Update README (POST /api/compiler/feedback)
+ */
+router.post('/feedback', async (req, res) => {
+  const { name, rating, mode, comment, device } = req.body;
+
+  if (!comment || typeof comment !== 'string') {
+    return res.status(400).json({ success: false, error: 'Feedback comment is required.' });
+  }
+
+  try {
+    const result = await saveFeedbackAndSyncReadme({
+      name,
+      rating,
+      mode,
+      comment,
+      device
+    });
+    return res.json(result);
+  } catch (error) {
+    console.error('Feedback submit error:', error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * 💬 Route 6: Get Feedback History (GET /api/compiler/feedback)
+ */
+router.get('/feedback', async (req, res) => {
+  try {
+    const feedbacks = await getRecentFeedbacks();
+    return res.json({ success: true, feedbacks });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
   }
 });
 

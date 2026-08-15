@@ -1,5 +1,6 @@
-import React from 'react';
-import { Play, Send, Moon, Code2, Loader2, Home, ListFilter, Zap, Unlock, Save } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Play, Send, Moon, Code2, Loader2, Home, ListFilter, Zap, Unlock, Save, Download, Smartphone } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Navbar = ({
   mode,
@@ -12,6 +13,47 @@ const Navbar = ({
   isSaving = false
 }) => {
   const isIntegrated = mode === 'integrated';
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+      setIsInstalled(true);
+    }
+
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setIsInstalled(true);
+        toast.success('🎉 LeetCompiler installed to your home screen!');
+      }
+      setDeferredPrompt(null);
+    } else {
+      toast('📱 To install on your phone: Tap browser menu (⋮ or Share) ➔ Add to Home Screen', {
+        icon: '📲',
+        duration: 5000,
+        style: {
+          fontFamily: 'var(--font-hand)',
+          fontSize: '1rem',
+          background: 'var(--paper-bg)',
+          border: '2px solid var(--sketch-border)',
+          color: 'var(--text-ink)'
+        }
+      });
+    }
+  };
 
   return (
     <nav className="navbar">
@@ -89,6 +131,31 @@ const Navbar = ({
 
       {/* Action Controls */}
       <div className="nav-actions">
+        {/* Install App PWA Button */}
+        {!isInstalled && (
+          <button
+            onClick={handleInstallApp}
+            className="btn-icon"
+            title="Install as Mobile App"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.95rem',
+              fontFamily: 'var(--font-hand)',
+              padding: '4px 10px',
+              border: '1.5px solid #2563eb',
+              borderRadius: '4px',
+              backgroundColor: 'rgba(37, 99, 235, 0.08)',
+              color: '#1d4ed8',
+              fontWeight: 600
+            }}
+          >
+            <Smartphone size={16} />
+            <span>Install App</span>
+          </button>
+        )}
+
         {/* Save to DB Button */}
         <button
           onClick={onSave}
@@ -121,17 +188,21 @@ const Navbar = ({
           className="btn-icon btn-run"
           onClick={onRun}
           disabled={isRunning}
-          title="Run Code (Ctrl + Enter)"
+          title="Run tests and execution"
           style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
             cursor: isRunning ? 'not-allowed' : 'pointer',
-            opacity: isRunning ? 0.6 : 1
+            opacity: isRunning ? 0.7 : 1
           }}
         >
           {isRunning ? (
-            <Loader2 size={20} className="animate-spin" />
+            <Loader2 size={18} className="animate-spin" />
           ) : (
-            <Play size={20} fill="currentColor" />
+            <Play size={18} fill="currentColor" />
           )}
+          <span>{isRunning ? 'Running...' : 'Run'}</span>
         </button>
 
         <button
@@ -139,21 +210,19 @@ const Navbar = ({
           onClick={onRun}
           disabled={isRunning}
           style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
             cursor: isRunning ? 'not-allowed' : 'pointer',
             opacity: isRunning ? 0.7 : 1
           }}
         >
           {isRunning ? (
-            <>
-              <Loader2 size={16} className="animate-spin" />
-              <span>Running...</span>
-            </>
+            <Loader2 size={18} className="animate-spin" />
           ) : (
-            <>
-              <Send size={16} />
-              <span>{isIntegrated ? 'Submit' : 'Execute'}</span>
-            </>
+            <Send size={18} />
           )}
+          <span>{isRunning ? 'Executing...' : 'Execute'}</span>
         </button>
       </div>
     </nav>

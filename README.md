@@ -120,7 +120,7 @@ npm run dev
 
 ## 💬 Community & User Feedback
 
-*Real-time feedback submitted by developers on every 10th execution milestone:*
+*Real-time feedback submitted by developers on every 5th execution milestone:*
 
 | Developer | Rating | Mode | Feedback / Comments | Date |
 |---|---|---|---|---|

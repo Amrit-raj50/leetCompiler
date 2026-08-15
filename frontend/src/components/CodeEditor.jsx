@@ -84,33 +84,6 @@ const CodeEditor = ({
           <span className="hide-on-mobile" style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'var(--font-hand)' }}>
             Ctrl + Enter to Run
           </span>
-          <button
-            onClick={onRun}
-            disabled={isRunning}
-            className="btn btn-run"
-            style={{
-              padding: '2px 12px',
-              fontSize: '1.2rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: isRunning ? 'not-allowed' : 'pointer',
-              opacity: isRunning ? 0.7 : 1
-            }}
-            title="Run Code (Ctrl+Enter)"
-          >
-            {isRunning ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                <span>Running...</span>
-              </>
-            ) : (
-              <>
-                <Play size={16} fill="currentColor" />
-                <span>Run</span>
-              </>
-            )}
-          </button>
         </div>
       </div>
 
@@ -143,6 +116,7 @@ const CodeEditor = ({
               backgroundImage: 'linear-gradient(var(--line-color) 1px, transparent 1px)',
               backgroundSize: '100% var(--grid-size)',
               backgroundPosition: '0 -1px',
+              backgroundAttachment: 'local',
             }}>
               {Object.entries(LANGUAGE_LABELS).map(([key, label]) => (
                 <div 

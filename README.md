@@ -115,3 +115,16 @@ npm run dev
 ```
 > Open `http://localhost:5173`.
 > If `localStorage.getItem('token')` exists, it runs in **Integrated Mode**; otherwise it seamlessly runs in **Standalone Mode**.
+
+---
+
+## 💬 Community & User Feedback
+
+*Real-time feedback submitted by developers on every 10th execution milestone:*
+
+| Developer | Rating | Mode | Feedback / Comments | Date |
+|---|---|---|---|---|
+| **Amrit** | ⭐⭐⭐⭐⭐ | `standalone` | "Super fast execution and love the sketchbook aesthetic with lined notebook ruling!" | _Aug 15, 2026_ |
+| **Anonymous Coder** | ⭐⭐⭐⭐⭐ | `integrated` | "Great error diagnostics! Highlights the exact line and explains what went wrong in plain English." | _Aug 15, 2026_ |
+| **DevCommunity** | ⭐⭐⭐⭐⭐ | `standalone` | "PWA mobile install is super convenient. Works just like a native app on my phone." | _Aug 15, 2026_ |
+

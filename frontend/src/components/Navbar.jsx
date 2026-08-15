@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Send, Moon, Code2, Loader2, Home, ListFilter, Zap, Unlock, Save, Download, Smartphone } from 'lucide-react';
+import { Play, Send, Moon, Code2, Loader2, Home, ListFilter, Zap, Unlock, Save, Download, Smartphone, MessageSquareHeart } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Navbar = ({
@@ -9,6 +9,7 @@ const Navbar = ({
   onGoHome,
   onRun,
   onSave,
+  onOpenFeedback,
   isRunning = false,
   isSaving = false
 }) => {
@@ -155,6 +156,29 @@ const Navbar = ({
             <span>Install App</span>
           </button>
         )}
+
+        {/* Feedback Button */}
+        <button
+          onClick={onOpenFeedback}
+          className="btn-icon"
+          title="Leave feedback for README"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '0.95rem',
+            fontFamily: 'var(--font-hand)',
+            padding: '4px 10px',
+            border: '1.5px solid #dc2626',
+            borderRadius: '4px',
+            backgroundColor: 'rgba(220, 38, 38, 0.08)',
+            color: '#b91c1c',
+            fontWeight: 600
+          }}
+        >
+          <MessageSquareHeart size={16} />
+          <span>Feedback</span>
+        </button>
 
         {/* Save to DB Button */}
         <button

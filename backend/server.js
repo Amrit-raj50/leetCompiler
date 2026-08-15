@@ -21,6 +21,12 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Sanitize double slashes in URLs (e.g. //run -> /run)
+app.use((req, res, next) => {
+  req.url = req.url.replace(/\/{2,}/g, '/');
+  next();
+});
+
 // Request Logger
 app.use((req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -29,22 +35,22 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
+// Mount Routes on /api/compiler, /api, and root / for maximum compatibility
 app.use('/api/compiler', compilerRoutes);
+app.use('/api', compilerRoutes);
+app.use('/', compilerRoutes);
 
-// Root route
+// Root Health/Info route
 app.get('/', (req, res) => {
   res.json({
     name: 'LeetCompiler Dual-Mode Backend API',
     version: '1.0.0',
-    modes: {
-      standalone: 'POST /api/compiler/run (no JWT required, public code execution)',
-      integrated: 'POST /api/compiler/run or /run-integrated (with JWT, updates MongoDB revision)'
-    },
+    status: 'running',
     endpoints: {
       health: 'GET /api/compiler/health',
       run: 'POST /api/compiler/run',
-      runIntegrated: 'POST /api/compiler/run-integrated'
+      save: 'POST /api/compiler/save',
+      saved: 'GET /api/compiler/saved'
     }
   });
 });
@@ -60,6 +66,5 @@ app.use((err, req, res, next) => {
 // Start Server
 app.listen(PORT, () => {
   console.log(`⚡ LeetCompiler backend server is running on http://localhost:${PORT}`);
-  console.log(`🚀 [Standalone Mode]: POST http://localhost:${PORT}/api/compiler/run`);
-  console.log(`🔐 [Integrated Mode]: POST http://localhost:${PORT}/api/compiler/run (with Authorization header)`);
+  console.log(`🚀 [Ready]: POST http://localhost:${PORT}/api/compiler/run`);
 });

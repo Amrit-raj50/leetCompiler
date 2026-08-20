@@ -26,7 +26,7 @@ const SubmissionDetails = ({ execResult, code, lang, problem }) => {
   }
 
   return (
-    <div className="pane-content prose" style={{ padding: '24px 32px' }}>
+    <div className="pane-content prose" style={{ paddingTop: '24px', paddingBottom: '24px' }}>
       <h1 style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
         {isAccepted ? <CheckCircle2 size={32} color={statusColor} /> : <XCircle size={32} color={statusColor} />}
         <span style={{ color: statusColor, fontSize: '2.5rem', fontFamily: 'var(--font-hand)', fontWeight: 700 }}>{statusText}</span>

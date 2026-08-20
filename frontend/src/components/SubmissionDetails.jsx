@@ -26,13 +26,13 @@ const SubmissionDetails = ({ execResult, code, lang, problem }) => {
   }
 
   return (
-    <div className="pane-content prose" style={{ paddingTop: '24px', paddingBottom: '24px' }}>
-      <h1 style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <div className="pane-content prose" style={{ paddingTop: '48px', paddingBottom: '48px' }}>
+      <h1 style={{ marginBottom: '48px', display: 'flex', alignItems: 'center', gap: '12px' }}>
         {isAccepted ? <CheckCircle2 size={32} color={statusColor} /> : <XCircle size={32} color={statusColor} />}
         <span style={{ color: statusColor, fontSize: '2.5rem', fontFamily: 'var(--font-hand)', fontWeight: 700 }}>{statusText}</span>
       </h1>
 
-      <div style={{ display: 'flex', gap: '24px', marginBottom: '32px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '24px', marginBottom: '48px', flexWrap: 'wrap' }}>
         {execResult.executionTimeMs !== undefined && (
           <div className="sketch-box" style={{ padding: '16px 24px', flex: '1', minWidth: '150px' }}>
             <div style={{ color: 'var(--text-muted)', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontFamily: 'var(--font-hand)' }}>
@@ -56,11 +56,21 @@ const SubmissionDetails = ({ execResult, code, lang, problem }) => {
         )}
       </div>
 
-      <div className="sketch-box" style={{ padding: '20px', backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
-        <h3 style={{ marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-hand)' }}>
-          <Code size={20} /> Submitted Code
-        </h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontSize: '1rem', color: 'var(--text-muted)', fontFamily: 'var(--font-hand)' }}>
+      <h3 style={{ marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-hand)' }}>
+        <Code size={24} /> 
+        <span style={{ 
+          backgroundColor: 'rgba(134, 239, 172, 0.6)', 
+          padding: '2px 12px', 
+          borderRadius: '4px 8px 3px 6px / 7px 4px 6px 3px',
+          display: 'inline-block',
+          transform: 'rotate(-1deg)'
+        }}>
+          Submitted Code
+        </span>
+      </h3>
+      
+      <div className="sketch-box" style={{ padding: '24px', backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', fontSize: '1rem', color: 'var(--text-muted)', fontFamily: 'var(--font-hand)' }}>
           <FileCode size={18} /> 
           <span style={{ textTransform: 'capitalize', fontWeight: 'bold' }}>{lang}</span>
         </div>

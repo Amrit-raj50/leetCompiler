@@ -29,7 +29,8 @@ const OutputConsole = ({
   execResult,
   isRunning,
   testCases = [],
-  onUpdateTestCase
+  onUpdateTestCase,
+  style
 }) => {
   const [selectedCaseIndex, setSelectedCaseIndex] = useState(0);
   const [showRawTrace, setShowRawTrace] = useState(false);
@@ -47,7 +48,7 @@ const OutputConsole = ({
   };
 
   return (
-    <div className="console-pane">
+    <div className="console-pane" style={style}>
       <div className="pane-header" style={{ justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Terminal size={20} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import ProblemDescription from './components/ProblemDescription';
@@ -28,6 +28,29 @@ function App() {
   const [isRunning, setIsRunning] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeConsoleTab, setActiveConsoleTab] = useState('output');
+
+  const [editorFlex, setEditorFlex] = useState(66); // Default to 2/3 ratio (similar to original flex: 2 vs flex: 1)
+  const workspaceRef = useRef(null);
+
+  const startResizing = (e) => {
+    e.preventDefault();
+    const handleMouseMove = (mouseMoveEvent) => {
+      if (!workspaceRef.current) return;
+      const containerRect = workspaceRef.current.getBoundingClientRect();
+      const top = mouseMoveEvent.clientY - containerRect.top;
+      let newEditorFlex = (top / containerRect.height) * 100;
+      newEditorFlex = Math.max(15, Math.min(newEditorFlex, 85));
+      setEditorFlex(newEditorFlex);
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
 
   // Feedback on every 10 runs
   const [runCount, setRunCount] = useState(() => {
@@ -297,8 +320,9 @@ function App() {
               </div>
 
               {/* Right Page: Split Monaco Editor + Console */}
-              <div className="right-pane">
+              <div className="right-pane" ref={workspaceRef}>
                 <CodeEditor
+                  style={{ flex: `${editorFlex} 1 0%` }}
                   code={code}
                   setCode={setCode}
                   lang={lang}
@@ -306,7 +330,29 @@ function App() {
                   onRun={handleRunCode}
                   isRunning={isRunning}
                 />
+                <div 
+                  onMouseDown={startResizing}
+                  style={{
+                    height: '8px',
+                    cursor: 'row-resize',
+                    backgroundColor: 'var(--sketch-border)',
+                    opacity: 0.15,
+                    margin: '2px 0',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 10,
+                    transition: 'opacity 0.2s',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.15'}
+                  title="Drag to resize"
+                >
+                  <div style={{ width: '40px', height: '2px', backgroundColor: '#334155', borderRadius: '1px' }} />
+                </div>
                 <OutputConsole
+                  style={{ flex: `${100 - editorFlex} 1 0%` }}
                   activeTab={activeConsoleTab}
                   setActiveTab={setActiveConsoleTab}
                   output={output}
@@ -320,8 +366,9 @@ function App() {
           ) : (
             /* Standalone Mode: Full-Width VS Code-like Scratchpad (No Left Desc / No Spiral) */
             <div className="workspace standalone-workspace">
-              <div className="full-editor-pane">
+              <div className="full-editor-pane" ref={workspaceRef}>
                 <CodeEditor
+                  style={{ flex: `${editorFlex} 1 0%` }}
                   code={code}
                   setCode={setCode}
                   lang={lang}
@@ -329,7 +376,29 @@ function App() {
                   onRun={handleRunCode}
                   isRunning={isRunning}
                 />
+                <div 
+                  onMouseDown={startResizing}
+                  style={{
+                    height: '8px',
+                    cursor: 'row-resize',
+                    backgroundColor: 'var(--sketch-border)',
+                    opacity: 0.15,
+                    margin: '2px 0',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 10,
+                    transition: 'opacity 0.2s',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.5'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '0.15'}
+                  title="Drag to resize"
+                >
+                  <div style={{ width: '40px', height: '2px', backgroundColor: '#334155', borderRadius: '1px' }} />
+                </div>
                 <OutputConsole
+                  style={{ flex: `${100 - editorFlex} 1 0%` }}
                   activeTab={activeConsoleTab}
                   setActiveTab={setActiveConsoleTab}
                   output={output}

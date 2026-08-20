@@ -9,7 +9,8 @@ const CodeEditor = ({
   lang,
   setLang,
   onRun,
-  isRunning = false
+  isRunning = false,
+  style
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
@@ -74,7 +75,7 @@ const CodeEditor = ({
   const monacoLanguage = MONACO_LANG_MAP[lang] || 'javascript';
 
   return (
-    <div className="editor-pane">
+    <div className="editor-pane" style={style}>
       <div className="pane-header" style={{ justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Code size={20} />

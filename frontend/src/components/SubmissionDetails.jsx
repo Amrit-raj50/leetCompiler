@@ -58,13 +58,7 @@ const SubmissionDetails = ({ execResult, code, lang, problem }) => {
 
       <h3 style={{ marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px', fontFamily: 'var(--font-hand)' }}>
         <Code size={24} /> 
-        <span style={{ 
-          backgroundColor: 'rgba(134, 239, 172, 0.6)', 
-          padding: '2px 12px', 
-          borderRadius: '4px 8px 3px 6px / 7px 4px 6px 3px',
-          display: 'inline-block',
-          transform: 'rotate(-1deg)'
-        }}>
+        <span className="brush-highlight">
           Submitted Code
         </span>
       </h3>

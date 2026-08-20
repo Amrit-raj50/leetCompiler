@@ -29,7 +29,8 @@ const OutputConsole = ({
   execResult,
   isRunning,
   testCases = [],
-  onUpdateTestCase
+  onUpdateTestCase,
+  style
 }) => {
   const [selectedCaseIndex, setSelectedCaseIndex] = useState(0);
   const [showRawTrace, setShowRawTrace] = useState(false);
@@ -47,15 +48,34 @@ const OutputConsole = ({
   };
 
   return (
-    <div className="console-pane">
-      <div className="pane-header" style={{ justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Terminal size={20} />
-          <span>Console</span>
+    <div className="console-pane" style={style}>
+      {/* Combined Header & Tabs */}
+      <div className="tabs-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid var(--sketch-border)', backgroundColor: 'rgba(0,0,0,0.02)' }}>
+        <div style={{ display: 'flex' }}>
+          {testCases.length > 0 && (
+            <button
+              className={`tab ${activeTab === 'testcases' ? 'active' : ''}`}
+              onClick={() => setActiveTab('testcases')}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <CheckCircle2 size={16} style={{ color: '#16a34a' }} />
+              Testcase
+            </button>
+          )}
+          <button
+            className={`tab ${activeTab === 'output' ? 'active' : ''}`}
+            onClick={() => setActiveTab('output')}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Terminal size={16} />
+            Test Result
+            {execResult?.allPassed && <span style={{ color: '#16a34a' }}>●</span>}
+            {execResult?.error && <span style={{ color: '#dc2626' }}>●</span>}
+          </button>
         </div>
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {/* Mode Indicator Badge (Only for Integrated Mode) */}
+        {/* Right side actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingRight: '16px' }}>
           {isIntegrated && (
             <span
               style={{
@@ -72,7 +92,7 @@ const OutputConsole = ({
               }}
             >
               <Zap size={13} />
-              <span>Integrated Mode</span>
+              <span>Integrated</span>
             </span>
           )}
 
@@ -91,26 +111,6 @@ const OutputConsole = ({
           )}
         </div>
       </div>
-
-      {/* Console Tabs (Only show Testcases tab if testCases are present) */}
-      {testCases.length > 0 ? (
-        <div className="tabs-container" style={{ borderBottom: '2px solid var(--sketch-border)' }}>
-          <button
-            className={`tab ${activeTab === 'testcases' ? 'active' : ''}`}
-            onClick={() => setActiveTab('testcases')}
-          >
-            Testcases
-          </button>
-          <button
-            className={`tab ${activeTab === 'output' ? 'active' : ''}`}
-            onClick={() => setActiveTab('output')}
-          >
-            Test Result
-            {execResult?.allPassed && <span style={{ marginLeft: '6px', color: '#16a34a' }}>●</span>}
-            {execResult?.error && <span style={{ marginLeft: '6px', color: '#dc2626' }}>●</span>}
-          </button>
-        </div>
-      ) : null}
 
       <div className="pane-content">
         {isRunning ? (

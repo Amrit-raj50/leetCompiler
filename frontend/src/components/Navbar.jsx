@@ -207,7 +207,7 @@ const Navbar = ({
         {isIntegrated && (
           <button
             className="btn btn-submit"
-            onClick={onRun}
+            onClick={() => onRun({ isSubmit: true })}
             disabled={isRunning}
             style={{
               display: 'flex',

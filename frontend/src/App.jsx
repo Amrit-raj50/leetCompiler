@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import ProblemDescription from './components/ProblemDescription';
 import CodeEditor from './components/CodeEditor';
 import OutputConsole from './components/OutputConsole';
+import SubmissionDetails from './components/SubmissionDetails';
 import ModeSelector from './components/ModeSelector';
 import ProblemList from './components/ProblemList';
 import FeedbackModal from './components/FeedbackModal';
@@ -14,7 +15,10 @@ import { CODE_TEMPLATES } from './constants/templates';
 
 function App() {
   // Views: 'mode-select' | 'problem-list' | 'editor'
+  // Views: 'mode-select' | 'problem-list' | 'editor'
   const [currentView, setCurrentView] = useState('mode-select');
+  // Left pane tabs for integrated mode
+  const [leftPaneTab, setLeftPaneTab] = useState('description');
   // Mode: 'standalone' | 'integrated'
   const [mode, setMode] = useState('standalone');
   
@@ -83,6 +87,7 @@ function App() {
     setCode(problemTemplate);
     setOutput('');
     setExecResult(null);
+    setLeftPaneTab('description');
     setActiveConsoleTab('testcases');
     setCurrentView('editor');
   };
@@ -157,7 +162,9 @@ function App() {
   };
 
   // Run Code Handler
-  const handleRunCode = async () => {
+  const handleRunCode = async (options = {}) => {
+    const isSubmit = options?.isSubmit === true;
+
     if (isRunning) return;
 
     setIsRunning(true);
@@ -189,6 +196,10 @@ function App() {
       });
 
       setExecResult(result);
+
+      if (isSubmit) {
+        setLeftPaneTab('submission');
+      }
 
       const outputText = result?.output || result?.stdout || (result?.error ? `❌ ${result.error}` : '✅ Code executed successfully.');
       setOutput(outputText);
@@ -231,6 +242,10 @@ function App() {
         mode,
         diagnostics
       });
+
+      if (isSubmit) {
+        setLeftPaneTab('submission');
+      }
       
       toast.error(diagnostics?.type || '❌ Execution error. See details below.', {
         id: 'run-status',
@@ -307,9 +322,33 @@ function App() {
           {mode === 'integrated' ? (
             /* Integrated Mode: 2-Page Spiral Notebook Workspace */
             <div className="workspace">
-              {/* Left Page: Problem Description */}
+              {/* Left Page: Problem Description & Submissions */}
               <div className="left-pane">
-                <ProblemDescription problem={currentProblem} />
+                <div className="tabs-container" style={{ borderBottom: '2px solid var(--sketch-border)', backgroundColor: 'rgba(0,0,0,0.02)' }}>
+                  <button
+                    className={`tab ${leftPaneTab === 'description' ? 'active' : ''}`}
+                    onClick={() => setLeftPaneTab('description')}
+                  >
+                    Description
+                  </button>
+                  <button
+                    className={`tab ${leftPaneTab === 'submission' ? 'active' : ''}`}
+                    onClick={() => setLeftPaneTab('submission')}
+                  >
+                    Submission
+                  </button>
+                </div>
+                
+                {leftPaneTab === 'description' ? (
+                  <ProblemDescription problem={currentProblem} />
+                ) : (
+                  <SubmissionDetails 
+                    execResult={execResult} 
+                    code={code} 
+                    lang={lang} 
+                    problem={currentProblem} 
+                  />
+                )}
               </div>
 
               {/* Center Spiral Binding */}

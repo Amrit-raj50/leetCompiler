@@ -245,7 +245,8 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
                   fontFamily: 'var(--font-hand)',
                   textDecoration: 'none',
                   cursor: 'pointer',
-                  fontWeight: '600'
+                  fontWeight: '600',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 <Mail size={16} /> Email me an idea!
@@ -264,7 +265,7 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
                     cursor: 'pointer'
                   }}
                 >
-                  Skip / Cancel
+                  Skip
                 </button>
 
                 <button

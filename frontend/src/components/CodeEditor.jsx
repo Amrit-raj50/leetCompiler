@@ -184,8 +184,8 @@ const CodeEditor = ({
             glyphMargin: false,
             folding: !isMobile,
             lineNumbers: 'on',
-            lineNumbersMinChars: 3,
-            lineDecorationsWidth: isMobile ? 10 : 24, /* Pushes code past the 60px red margin line */
+            lineNumbersMinChars: 4,
+            lineDecorationsWidth: isMobile ? 8 : 12, /* Pushes code past the 60px red margin line */
             quickSuggestions: false,
             suggestOnTriggerCharacters: false,
             acceptSuggestionOnEnter: 'off',

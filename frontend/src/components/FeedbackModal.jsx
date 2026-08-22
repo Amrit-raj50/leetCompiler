@@ -7,6 +7,7 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
   const [showRatingText, setShowRatingText] = useState(false);
+  const [clickedStarIndex, setClickedStarIndex] = useState(null);
   const ratingTimeoutRef = useRef(null);
   const [name, setName] = useState('');
   const [comment, setComment] = useState('');
@@ -55,7 +56,16 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
   };
 
   return (
-    <div
+    <>
+      <style>{`
+        @keyframes floatUp3D {
+          0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.5) perspective(400px) rotateX(-20deg) rotateY(10deg); }
+          20% { opacity: 1; transform: translateX(-50%) translateY(-25px) scale(1.2) perspective(400px) rotateX(10deg) rotateY(-10deg); }
+          50% { opacity: 1; transform: translateX(-50%) translateY(-35px) scale(1) perspective(400px) rotateX(0deg) rotateY(5deg); }
+          100% { opacity: 0; transform: translateX(-50%) translateY(-55px) scale(0.8) perspective(400px) rotateX(20deg) rotateY(0deg); }
+        }
+      `}</style>
+      <div
       onClick={handleDismiss}
       style={{
         position: 'fixed',
@@ -145,13 +155,15 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
                     type="button"
                     onClick={() => {
                       setRating(star);
+                      setClickedStarIndex(star);
                       setShowRatingText(true);
                       if (ratingTimeoutRef.current) clearTimeout(ratingTimeoutRef.current);
-                      ratingTimeoutRef.current = setTimeout(() => setShowRatingText(false), 1000);
+                      ratingTimeoutRef.current = setTimeout(() => setShowRatingText(false), 2000);
                     }}
                     onMouseEnter={() => setHoverRating(star)}
                     onMouseLeave={() => setHoverRating(0)}
                     style={{
+                      position: 'relative',
                       background: 'none',
                       border: 'none',
                       cursor: 'pointer',
@@ -164,13 +176,39 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
                       fill={(hoverRating || rating) >= star ? '#f59e0b' : 'none'}
                       color={(hoverRating || rating) >= star ? '#d97706' : 'var(--text-muted)'}
                     />
+                    {showRatingText && clickedStarIndex === star && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '100%',
+                        left: '50%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        pointerEvents: 'none',
+                        animation: 'floatUp3D 2s ease-out forwards',
+                        whiteSpace: 'nowrap',
+                        zIndex: 100
+                      }}>
+                        <span style={{ fontSize: '1.8rem', marginBottom: '2px', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }}>
+                           {rating === 5 ? '🚀' : rating === 4 ? '🔥' : rating === 3 ? '👍' : rating === 2 ? '🤔' : '😢'}
+                        </span>
+                        <span style={{
+                          fontSize: '0.9rem',
+                          fontFamily: 'var(--font-hand)',
+                          color: '#b45309',
+                          fontWeight: 800,
+                          backgroundColor: 'rgba(255,255,255,0.95)',
+                          padding: '4px 10px',
+                          borderRadius: '12px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                          border: '1px solid rgba(245, 158, 11, 0.3)'
+                        }}>
+                          {rating === 5 ? 'Amazing!' : rating === 4 ? 'Great!' : rating === 3 ? 'Good' : rating === 2 ? 'Fair' : 'Needs Fix'}
+                        </span>
+                      </div>
+                    )}
                   </button>
                 ))}
-                {showRatingText && (
-                  <span style={{ marginLeft: '8px', fontSize: '1.1rem', fontFamily: 'var(--font-hand)', color: '#b45309', fontWeight: 700, alignSelf: 'center', animation: 'fadeInOut 1s forwards' }}>
-                    {rating === 5 ? '⭐⭐⭐⭐⭐ Amazing!' : rating === 4 ? '⭐⭐⭐⭐ Great!' : rating === 3 ? '⭐⭐⭐ Good' : rating === 2 ? '⭐⭐ Fair' : '⭐ Needs Improvement'}
-                  </span>
-                )}
               </div>
             </div>
 
@@ -293,6 +331,7 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
         )}
       </div>
     </div>
+    </>
   );
 };
 

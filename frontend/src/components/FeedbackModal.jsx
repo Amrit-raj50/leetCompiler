@@ -124,20 +124,6 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {/* Modal Header */}
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <MessageSquareHeart size={24} style={{ color: '#dc2626' }} />
-                <span style={{
-                  fontSize: '0.85rem',
-                  fontFamily: 'var(--font-mono)',
-                  padding: '2px 8px',
-                  backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                  borderRadius: '12px',
-                  color: '#b91c1c',
-                  fontWeight: 700
-                }}>
-                  Milestone: {runCount}th Run Completed
-                </span>
-              </div>
               <h2 style={{ fontSize: '2rem', fontFamily: 'var(--font-hand)', fontWeight: 800, margin: '2px 0' }}>
                 Share Your Feedback
               </h2>

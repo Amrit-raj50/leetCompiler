@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Star, MessageSquareHeart, X, Send, Loader2, Sparkles, CheckCircle2, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { submitFeedbackApi } from '../services/compilerService';
@@ -6,6 +6,8 @@ import { submitFeedbackApi } from '../services/compilerService';
 const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) => {
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
+  const [showRatingText, setShowRatingText] = useState(false);
+  const ratingTimeoutRef = useRef(null);
   const [name, setName] = useState('');
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -141,7 +143,12 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
                   <button
                     key={star}
                     type="button"
-                    onClick={() => setRating(star)}
+                    onClick={() => {
+                      setRating(star);
+                      setShowRatingText(true);
+                      if (ratingTimeoutRef.current) clearTimeout(ratingTimeoutRef.current);
+                      ratingTimeoutRef.current = setTimeout(() => setShowRatingText(false), 1000);
+                    }}
                     onMouseEnter={() => setHoverRating(star)}
                     onMouseLeave={() => setHoverRating(0)}
                     style={{
@@ -159,7 +166,11 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
                     />
                   </button>
                 ))}
-
+                {showRatingText && (
+                  <span style={{ marginLeft: '8px', fontSize: '1.1rem', fontFamily: 'var(--font-hand)', color: '#b45309', fontWeight: 700, alignSelf: 'center', animation: 'fadeInOut 1s forwards' }}>
+                    {rating === 5 ? '⭐⭐⭐⭐⭐ Amazing!' : rating === 4 ? '⭐⭐⭐⭐ Great!' : rating === 3 ? '⭐⭐⭐ Good' : rating === 2 ? '⭐⭐ Fair' : '⭐ Needs Improvement'}
+                  </span>
+                )}
               </div>
             </div>
 

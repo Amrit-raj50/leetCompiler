@@ -159,9 +159,7 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
                     />
                   </button>
                 ))}
-                <span style={{ marginLeft: '8px', fontSize: '1.1rem', fontFamily: 'var(--font-hand)', color: '#b45309', fontWeight: 700 }}>
-                  {rating === 5 ? '⭐⭐⭐⭐⭐ Amazing!' : rating === 4 ? '⭐⭐⭐⭐ Great!' : rating === 3 ? '⭐⭐⭐ Good' : 'Needs Improvement'}
-                </span>
+
               </div>
             </div>
 

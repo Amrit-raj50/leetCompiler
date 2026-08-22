@@ -233,7 +233,7 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
             {/* Action Buttons */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
               <a
-                href="mailto:youremail@example.com?subject=LeetCompiler Idea/Improvement"
+                href="mailto:ankits.kumar.cg@gmail.com?subject=LeetCompiler Idea/Improvement"
                 style={{
                   display: 'flex',
                   alignItems: 'center',

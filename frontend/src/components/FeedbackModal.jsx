@@ -189,7 +189,7 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Amrit or @developer"
+                placeholder="e.g. Amrit or @ankit"
                 style={{
                   width: '100%',
                   padding: '8px 12px',
@@ -233,7 +233,7 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
             {/* Action Buttons */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
               <a
-                href="mailto:ankits.kumar.cg@gmail.com?subject=LeetCompiler Idea/Improvement"
+                href="mailto:ncode8952@gmail.com?subject=LeetCompiler Idea/Improvement"
                 style={{
                   display: 'flex',
                   alignItems: 'center',

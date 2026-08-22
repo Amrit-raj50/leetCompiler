@@ -73,13 +73,12 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: 'var(--paper-bg)',
-          backgroundImage: 'linear-gradient(var(--line-color) 1px, transparent 1px)',
-          backgroundSize: '100% var(--grid-size)',
           maxWidth: '520px',
           width: '100%',
-          padding: '28px 24px',
-          borderRadius: '4px 8px 3px 6px / 7px 4px 6px 3px',
-          boxShadow: '0 16px 40px rgba(0,0,0,0.25)',
+          padding: '32px 28px',
+          borderRadius: '12px',
+          border: '1px solid var(--sketch-border)',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
           position: 'relative'
         }}
       >
@@ -121,23 +120,9 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Modal Header */}
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                <MessageSquareHeart size={24} style={{ color: '#dc2626' }} />
-                <span style={{
-                  fontSize: '0.85rem',
-                  fontFamily: 'var(--font-mono)',
-                  padding: '2px 8px',
-                  backgroundColor: 'rgba(220, 38, 38, 0.1)',
-                  borderRadius: '12px',
-                  color: '#b91c1c',
-                  fontWeight: 700
-                }}>
-                  Milestone: {runCount}th Run Completed
-                </span>
-              </div>
               <h2 style={{ fontSize: '2rem', fontFamily: 'var(--font-hand)', fontWeight: 800, margin: '2px 0' }}>
                 Share Your Feedback
               </h2>
@@ -231,7 +216,7 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px', paddingTop: '24px', borderTop: '1px solid var(--sketch-border)' }}>
               <a
                 href="https://mail.google.com/mail/?view=cm&fs=1&to=ncode8952@gmail.com&su=LeetCompiler+Idea/Improvement"
                 target="_blank"
@@ -245,7 +230,8 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
                   fontFamily: 'var(--font-hand)',
                   textDecoration: 'none',
                   cursor: 'pointer',
-                  fontWeight: '600'
+                  fontWeight: '600',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 <Mail size={16} /> Email me an idea!
@@ -264,7 +250,7 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
                     cursor: 'pointer'
                   }}
                 >
-                  Skip / Cancel
+                  Skip
                 </button>
 
                 <button

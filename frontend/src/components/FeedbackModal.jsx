@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, MessageSquareHeart, X, Send, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Star, MessageSquareHeart, X, Send, Loader2, Sparkles, CheckCircle2, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { submitFeedbackApi } from '../services/compilerService';
 
@@ -231,47 +231,66 @@ const FeedbackModal = ({ isOpen, onClose, mode = 'standalone', runCount = 5 }) =
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
-              <button
-                type="button"
-                onClick={handleDismiss}
-                disabled={isSubmitting}
-                className="btn-icon"
-                style={{
-                  padding: '6px 14px',
-                  fontFamily: 'var(--font-hand)',
-                  fontSize: '1.05rem',
-                  cursor: 'pointer'
-                }}
-              >
-                Skip / Cancel
-              </button>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="btn btn-submit"
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
+              <a
+                href="mailto:youremail@example.com?subject=LeetCompiler Idea/Improvement"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  fontSize: '1.15rem',
-                  padding: '6px 16px',
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer'
+                  color: '#2563eb',
+                  fontSize: '0.95rem',
+                  fontFamily: 'var(--font-hand)',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  fontWeight: '600'
                 }}
               >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    <span>Submitting...</span>
-                  </>
-                ) : (
-                  <>
-                    <Send size={16} />
-                    <span>Submit to README</span>
-                  </>
-                )}
-              </button>
+                <Mail size={16} /> Email me an idea!
+              </a>
+
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  type="button"
+                  onClick={handleDismiss}
+                  disabled={isSubmitting}
+                  className="btn-icon"
+                  style={{
+                    padding: '6px 14px',
+                    fontFamily: 'var(--font-hand)',
+                    fontSize: '1.05rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Skip / Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn btn-submit"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '1.15rem',
+                    padding: '6px 16px',
+                    cursor: isSubmitting ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send size={16} />
+                      <span>Submit to README</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </form>
         )}

@@ -32,6 +32,7 @@ function App() {
   const [isRunning, setIsRunning] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeConsoleTab, setActiveConsoleTab] = useState('output');
+  const [stdin, setStdin] = useState('');  // User-provided standard input
 
   const [editorFlex, setEditorFlex] = useState(66); // Default to 2/3 ratio (similar to original flex: 2 vs flex: 1)
   const workspaceRef = useRef(null);
@@ -200,7 +201,8 @@ function App() {
         code,
         language: lang,
         questionSlug,
-        testCases
+        testCases,
+        stdin,
       });
 
       setExecResult(result);
@@ -408,6 +410,9 @@ function App() {
                   execResult={execResult}
                   isRunning={isRunning}
                   testCases={currentProblem?.testCases || []}
+                  stdin={stdin}
+                  setStdin={setStdin}
+                  onRun={handleRunCode}
                 />
               </div>
             </div>
@@ -455,6 +460,9 @@ function App() {
                   execResult={execResult}
                   isRunning={isRunning}
                   testCases={[]}
+                  stdin={stdin}
+                  setStdin={setStdin}
+                  onRun={handleRunCode}
                 />
               </div>
             </div>

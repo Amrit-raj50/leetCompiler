@@ -30,6 +30,9 @@ const OutputConsole = React.forwardRef(({
   isRunning,
   testCases = [],
   onUpdateTestCase,
+  stdin = '',
+  setStdin,
+  onRun,
   style
 }, ref) => {
   const [selectedCaseIndex, setSelectedCaseIndex] = useState(0);
@@ -62,6 +65,14 @@ const OutputConsole = React.forwardRef(({
               Testcase
             </button>
           )}
+          <button
+            className={`tab ${activeTab === 'stdin' ? 'active' : ''}`}
+            onClick={() => setActiveTab('stdin')}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Lightbulb size={16} style={{ color: '#eab308' }} />
+            Custom Input {stdin ? <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#eab308', display: 'inline-block' }}></span> : null}
+          </button>
           <button
             className={`tab ${activeTab === 'output' ? 'active' : ''}`}
             onClick={() => setActiveTab('output')}
@@ -195,6 +206,81 @@ const OutputConsole = React.forwardRef(({
                     )}
                   </>
                 )}
+              </div>
+            )}
+
+            {/* 1.5 Custom Input (Stdin) Tab */}
+            {activeTab === 'stdin' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', height: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '1rem', fontFamily: 'var(--font-hand)', color: 'var(--text-ink)', fontWeight: 600 }}>
+                    Standard Input (stdin) for your program:
+                  </span>
+                  {stdin && setStdin && (
+                    <button
+                      onClick={() => setStdin('')}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--text-muted)',
+                        fontSize: '0.85rem',
+                        fontFamily: 'var(--font-hand)',
+                        cursor: 'pointer',
+                        textDecoration: 'underline'
+                      }}
+                    >
+                      Clear Input
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  value={stdin}
+                  onChange={(e) => setStdin && setStdin(e.target.value)}
+                  placeholder="Enter inputs here (e.g. for Java Scanner, Python input(), C++ cin, etc.). Multiple inputs can be on separate lines."
+                  rows={4}
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: '10px 14px',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.95rem',
+                    border: '1.5px solid var(--sketch-border)',
+                    borderRadius: '4px 7px 3px 5px / 6px 3px 5px 4px',
+                    backgroundColor: 'rgba(255,255,255,0.6)',
+                    color: 'var(--text-ink)',
+                    resize: 'vertical',
+                    outline: 'none'
+                  }}
+                />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontFamily: 'var(--font-hand)' }}>
+                    💡 Inputs provided here will be piped into your program during run.
+                  </span>
+                  {onRun && (
+                    <button
+                      onClick={() => onRun()}
+                      disabled={isRunning}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '6px 14px',
+                        fontFamily: 'var(--font-hand)',
+                        fontSize: '0.95rem',
+                        fontWeight: 700,
+                        border: '1.5px solid var(--sketch-border)',
+                        borderRadius: '4px 7px 3px 5px / 6px 3px 5px 4px',
+                        backgroundColor: '#16a34a',
+                        color: '#fff',
+                        cursor: isRunning ? 'not-allowed' : 'pointer',
+                        opacity: isRunning ? 0.7 : 1
+                      }}
+                    >
+                      <Zap size={14} />
+                      <span>Run with Input</span>
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 

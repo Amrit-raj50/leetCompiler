@@ -73,7 +73,7 @@ const EXTENSION_MAP = {
   php: '.php'
 };
 
-export const runCode = async (code, language = 'javascript', questionSlug = 'two-sum', testCases = []) => {
+export const runCode = async (code, language = 'javascript', questionSlug = 'two-sum', testCases = [], stdin = '') => {
   if (!code || typeof code !== 'string') {
     throw new Error('Code is required for execution');
   }
@@ -184,6 +184,7 @@ export const runCode = async (code, language = 'javascript', questionSlug = 'two
       runDir,
       outBinaryPath,
       jarPath,
+      stdin,
       timeoutMs: TIMEOUT_MS
     });
 
@@ -206,7 +207,7 @@ export const runCode = async (code, language = 'javascript', questionSlug = 'two
     if (isLocalToolMissing) {
       try {
         console.log(`🌐 Routing execution for ${langKey.toUpperCase()} via cloud runner...`);
-        const fallbackResult = await executeWithCloudRunner(wrappedCode, langKey, entryClassName);
+        const fallbackResult = await executeWithCloudRunner(wrappedCode, langKey, entryClassName, stdin);
         // Use the cloud result if the call succeeded (even if output is empty)
         if (fallbackResult) {
           execResult = fallbackResult;
@@ -273,10 +274,10 @@ const JUDGE0_LANG_MAP = {
 /**
  * Cloud Execution Runner — tries Judge0 CE first, falls back to Piston
  */
-const executeWithCloudRunner = async (code, langKey, entryClassName = 'Main') => {
+const executeWithCloudRunner = async (code, langKey, entryClassName = 'Main', stdin = '') => {
   // --- Attempt 1: Judge0 CE (primary, free, no key needed) ---
   try {
-    const result = await executeWithJudge0(code, langKey, entryClassName);
+    const result = await executeWithJudge0(code, langKey, entryClassName, stdin);
     console.log(`[JUDGE0] Result: stdout="${result.stdout}" stderr="${result.stderr}" exitCode=${result.exitCode}`);
     return result;
   } catch (judge0Err) {
@@ -284,14 +285,14 @@ const executeWithCloudRunner = async (code, langKey, entryClassName = 'Main') =>
   }
 
   // --- Attempt 2: Piston (secondary fallback) ---
-  return executeWithPiston(code, langKey, entryClassName);
+  return executeWithPiston(code, langKey, entryClassName, stdin);
 };
 
 /**
  * Judge0 CE — Free public code execution API
  * Docs: https://ce.judge0.com / https://github.com/judge0/judge0
  */
-const executeWithJudge0 = async (code, langKey, entryClassName = 'Main') => {
+const executeWithJudge0 = async (code, langKey, entryClassName = 'Main', stdin = '') => {
   const languageId = JUDGE0_LANG_MAP[langKey];
   if (!languageId) throw new Error(`Language '${langKey}' not mapped for Judge0`);
 
@@ -300,7 +301,7 @@ const executeWithJudge0 = async (code, langKey, entryClassName = 'Main') => {
   const timeoutHandle = setTimeout(() => controller.abort(), 25000);
 
   try {
-    console.log(`[JUDGE0] Submitting ${langKey} (language_id=${languageId}, entry=${entryClassName})...`);
+    console.log(`[JUDGE0] Submitting ${langKey} (language_id=${languageId}, entry=${entryClassName}, stdinLength=${stdin?.length || 0})...`);
 
     // Java: Judge0 uses 'Main.java' as the implicit filename AND runs 'java Main'.
     // Fix: (1) strip 'public' so filename constraint is lifted,
@@ -329,7 +330,7 @@ const executeWithJudge0 = async (code, langKey, entryClassName = 'Main') => {
         body: JSON.stringify({
           source_code: sourceCode,
           language_id: languageId,
-          stdin: ''
+          stdin: stdin || ''
         })
       }
     );
@@ -378,7 +379,7 @@ const executeWithJudge0 = async (code, langKey, entryClassName = 'Main') => {
 /**
  * Piston API fallback (now whitelist-only — used only if Judge0 is unavailable)
  */
-const executeWithPiston = async (code, langKey, entryClassName = 'Main') => {
+const executeWithPiston = async (code, langKey, entryClassName = 'Main', stdin = '') => {
   const mapping = PISTON_LANG_MAP[langKey] || { language: 'javascript', version: '*' };
   const startHr = process.hrtime.bigint();
   const ext = EXTENSION_MAP[langKey] || '.js';
@@ -397,7 +398,8 @@ const executeWithPiston = async (code, langKey, entryClassName = 'Main') => {
       body: JSON.stringify({
         language: mapping.language,
         version: mapping.version || '*',
-        files: [{ name: fileName, content: code }]
+        files: [{ name: fileName, content: code }],
+        stdin: stdin || ''
       })
     });
 
@@ -462,6 +464,7 @@ const executeLanguageFile = async ({
   runDir = TEMP_DIR,
   outBinaryPath,
   jarPath,
+  stdin = '',
   timeoutMs
 }) => {
   const startHrTime = process.hrtime.bigint();
@@ -469,7 +472,7 @@ const executeLanguageFile = async ({
   // 1. JavaScript (Node.js)
   if (ext === '.js') {
     return new Promise((resolve) => {
-      runSubprocess('node', [filePath], timeoutMs, startHrTime, resolve, runDir);
+      runSubprocess('node', [filePath], timeoutMs, startHrTime, resolve, runDir, stdin);
     });
   }
 
@@ -477,7 +480,7 @@ const executeLanguageFile = async ({
   if (ext === '.py') {
     return new Promise((resolve) => {
       const pyCmd = process.platform === 'win32' ? 'python' : 'python3';
-      runSubprocess(pyCmd, [filePath], timeoutMs, startHrTime, resolve, runDir);
+      runSubprocess(pyCmd, [filePath], timeoutMs, startHrTime, resolve, runDir, stdin);
     });
   }
 
@@ -498,7 +501,7 @@ const executeLanguageFile = async ({
           });
           return;
         }
-        runSubprocess(outBinaryPath, [], timeoutMs, startHrTime, resolve, runDir);
+        runSubprocess(outBinaryPath, [], timeoutMs, startHrTime, resolve, runDir, stdin);
       });
     });
   }
@@ -520,7 +523,7 @@ const executeLanguageFile = async ({
           });
           return;
         }
-        runSubprocess(outBinaryPath, [], timeoutMs, startHrTime, resolve, runDir);
+        runSubprocess(outBinaryPath, [], timeoutMs, startHrTime, resolve, runDir, stdin);
       });
     });
   }
@@ -542,7 +545,7 @@ const executeLanguageFile = async ({
           });
           return;
         }
-        runSubprocess('java', ['-cp', '.', entryClassName], timeoutMs, startHrTime, resolve, runDir);
+        runSubprocess('java', ['-cp', '.', entryClassName], timeoutMs, startHrTime, resolve, runDir, stdin);
       });
     });
   }
@@ -550,7 +553,7 @@ const executeLanguageFile = async ({
   // 6. Go (Golang)
   if (ext === '.go') {
     return new Promise((resolve) => {
-      runSubprocess('go', ['run', filePath], timeoutMs, startHrTime, resolve, runDir);
+      runSubprocess('go', ['run', filePath], timeoutMs, startHrTime, resolve, runDir, stdin);
     });
   }
 
@@ -571,7 +574,7 @@ const executeLanguageFile = async ({
           });
           return;
         }
-        runSubprocess(outBinaryPath, [], timeoutMs, startHrTime, resolve, runDir);
+        runSubprocess(outBinaryPath, [], timeoutMs, startHrTime, resolve, runDir, stdin);
       });
     });
   }
@@ -579,21 +582,21 @@ const executeLanguageFile = async ({
   // 8. PHP
   if (ext === '.php') {
     return new Promise((resolve) => {
-      runSubprocess('php', [filePath], timeoutMs, startHrTime, resolve, runDir);
+      runSubprocess('php', [filePath], timeoutMs, startHrTime, resolve, runDir, stdin);
     });
   }
 
   // 9. Ruby
   if (ext === '.rb') {
     return new Promise((resolve) => {
-      runSubprocess('ruby', [filePath], timeoutMs, startHrTime, resolve, runDir);
+      runSubprocess('ruby', [filePath], timeoutMs, startHrTime, resolve, runDir, stdin);
     });
   }
 
   // 10. Swift
   if (ext === '.swift') {
     return new Promise((resolve) => {
-      runSubprocess('swift', [filePath], timeoutMs, startHrTime, resolve, runDir);
+      runSubprocess('swift', [filePath], timeoutMs, startHrTime, resolve, runDir, stdin);
     });
   }
 
@@ -614,7 +617,7 @@ const executeLanguageFile = async ({
           });
           return;
         }
-        runSubprocess('java', ['-jar', jarPath], timeoutMs, startHrTime, resolve, runDir);
+        runSubprocess('java', ['-jar', jarPath], timeoutMs, startHrTime, resolve, runDir, stdin);
       });
     });
   }
@@ -641,7 +644,7 @@ const executeLanguageFile = async ({
         }
         const runnerCmd = process.platform === 'win32' ? outBinaryPath : 'mono';
         const runnerArgs = process.platform === 'win32' ? [] : [outBinaryPath];
-        runSubprocess(runnerCmd, runnerArgs, timeoutMs, startHrTime, resolve, runDir);
+        runSubprocess(runnerCmd, runnerArgs, timeoutMs, startHrTime, resolve, runDir, stdin);
       });
     });
   }
@@ -659,7 +662,7 @@ const executeLanguageFile = async ({
 /**
  * Universal subprocess execution wrapper with timeout and memory tracking
  */
-const runSubprocess = (cmd, args, timeoutMs, startHrTime, resolve, cwd = TEMP_DIR) => {
+const runSubprocess = (cmd, args, timeoutMs, startHrTime, resolve, cwd = TEMP_DIR, stdin = '') => {
   let stdout = '';
   let stderr = '';
   let killed = false;
@@ -668,6 +671,19 @@ const runSubprocess = (cmd, args, timeoutMs, startHrTime, resolve, cwd = TEMP_DI
     cwd,
     windowsHide: true,
   });
+
+  if (stdin && child.stdin) {
+    try {
+      child.stdin.write(stdin);
+      child.stdin.end();
+    } catch (err) {
+      console.error('Failed to write to child process stdin:', err);
+    }
+  } else if (child.stdin) {
+    try {
+      child.stdin.end();
+    } catch (err) {}
+  }
 
   const timer = setTimeout(() => {
     killed = true;

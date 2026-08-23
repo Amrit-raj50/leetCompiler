@@ -22,14 +22,14 @@ router.get('/health', (req, res) => {
  * ⚡ Route 1: Dual-Mode Dynamic Runner (POST /api/compiler/run)
  */
 router.post('/run', optionalAuth, async (req, res) => {
-  const { code, language, questionSlug = 'scratchpad', testCases } = req.body;
+  const { code, language, questionSlug = 'scratchpad', testCases, stdin = '' } = req.body;
 
   if (!code || typeof code !== 'string') {
     return res.status(400).json({ error: 'Missing or invalid "code" parameter in request body' });
   }
 
   try {
-    const result = await runCode(code, language, questionSlug, testCases);
+    const result = await runCode(code, language, questionSlug, testCases, stdin);
 
     let revisionUpdate = null;
     let message = '🔓 Running in standalone mode. No data saved.';
@@ -121,14 +121,14 @@ router.get('/saved/:questionSlug', optionalAuth, async (req, res) => {
  * 🔐 Route 4: Strict Integrated Runner (POST /api/compiler/run-integrated)
  */
 router.post('/run-integrated', requireAuth, async (req, res) => {
-  const { code, language, questionSlug = 'two-sum', testCases } = req.body;
+  const { code, language, questionSlug = 'two-sum', testCases, stdin = '' } = req.body;
 
   if (!code || typeof code !== 'string') {
     return res.status(400).json({ error: 'Missing or invalid "code" parameter' });
   }
 
   try {
-    const result = await runCode(code, language, questionSlug, testCases);
+    const result = await runCode(code, language, questionSlug, testCases, stdin);
     let revisionUpdate = null;
 
     if (result.allPassed) {

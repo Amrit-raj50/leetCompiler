@@ -28,7 +28,7 @@ const getBaseApiUrl = () => {
 
 const API_URL = getBaseApiUrl();
 
-export const runCodeApi = async ({ code, language, questionSlug = 'two-sum', testCases = [] }) => {
+export const runCodeApi = async ({ code, language, questionSlug = 'two-sum', testCases = [], stdin = '' }) => {
   const token = localStorage.getItem('token') || '';
   
   const headers = {
@@ -46,6 +46,7 @@ export const runCodeApi = async ({ code, language, questionSlug = 'two-sum', tes
       language,
       questionSlug,
       testCases,
+      stdin,
     },
     { headers }
   );

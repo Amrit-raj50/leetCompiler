@@ -276,7 +276,7 @@ const JUDGE0_LANG_MAP = {
 const executeWithCloudRunner = async (code, langKey, entryClassName = 'Main') => {
   // --- Attempt 1: Judge0 CE (primary, free, no key needed) ---
   try {
-    const result = await executeWithJudge0(code, langKey);
+    const result = await executeWithJudge0(code, langKey, entryClassName);
     console.log(`[JUDGE0] Result: stdout="${result.stdout}" stderr="${result.stderr}" exitCode=${result.exitCode}`);
     return result;
   } catch (judge0Err) {
@@ -291,7 +291,7 @@ const executeWithCloudRunner = async (code, langKey, entryClassName = 'Main') =>
  * Judge0 CE — Free public code execution API
  * Docs: https://ce.judge0.com / https://github.com/judge0/judge0
  */
-const executeWithJudge0 = async (code, langKey) => {
+const executeWithJudge0 = async (code, langKey, entryClassName = 'Main') => {
   const languageId = JUDGE0_LANG_MAP[langKey];
   if (!languageId) throw new Error(`Language '${langKey}' not mapped for Judge0`);
 
@@ -300,16 +300,25 @@ const executeWithJudge0 = async (code, langKey) => {
   const timeoutHandle = setTimeout(() => controller.abort(), 25000);
 
   try {
-    console.log(`[JUDGE0] Submitting ${langKey} (language_id=${languageId})...`);
+    console.log(`[JUDGE0] Submitting ${langKey} (language_id=${languageId}, entry=${entryClassName})...`);
 
-    // Java: Judge0 uses 'Main.java' as the implicit filename.
-    // Java requires the public class name to match the filename, so strip 'public' from
-    // all top-level type declarations. This is safe — it doesn't affect runtime behavior.
+    // Java: Judge0 uses 'Main.java' as the implicit filename AND runs 'java Main'.
+    // Fix: (1) strip 'public' so filename constraint is lifted,
+    //      (2) rename the entry class to 'Main' so Judge0 can find the entry point.
     let sourceCode = code;
     if (langKey === 'java' || langKey === 'kt') {
-      sourceCode = code
-        .replace(/\bpublic\s+(class|interface|enum|record|@interface)\s+/g, '$1 ');
+      // Step 1: strip 'public' from all type declarations
+      sourceCode = sourceCode.replace(
+        /\bpublic\s+(class|interface|enum|record|@interface)\s+/g,
+        '$1 '
+      );
+      // Step 2: rename entry class to 'Main' (word-boundary safe global replace)
+      if (entryClassName && entryClassName !== 'Main') {
+        const escapedName = entryClassName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        sourceCode = sourceCode.replace(new RegExp(`\\b${escapedName}\\b`, 'g'), 'Main');
+      }
     }
+    console.log(`[JUDGE0] Code preview (first 400 chars):\n${sourceCode.slice(0, 400)}`);
 
     const response = await fetch(
       'https://ce.judge0.com/submissions?base64_encoded=false&wait=true',

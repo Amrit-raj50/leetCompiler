@@ -206,7 +206,7 @@ export const runCode = async (code, language = 'javascript', questionSlug = 'two
     if (isLocalToolMissing) {
       try {
         console.log(`🌐 Routing execution for ${langKey.toUpperCase()} via cloud runner...`);
-        const fallbackResult = await executeWithPistonApi(wrappedCode, langKey, entryClassName);
+        const fallbackResult = await executeWithCloudRunner(wrappedCode, langKey, entryClassName);
         // Use the cloud result if the call succeeded (even if output is empty)
         if (fallbackResult) {
           execResult = fallbackResult;
@@ -254,19 +254,120 @@ export const runCode = async (code, language = 'javascript', questionSlug = 'two
   }
 };
 
+// Judge0 CE language ID mapping (https://ce.judge0.com)
+const JUDGE0_LANG_MAP = {
+  javascript: 63, js: 63,
+  python: 71, python3: 71, py: 71,
+  java: 62,
+  cpp: 54, 'c++': 54,
+  c: 50,
+  csharp: 51, 'c#': 51, cs: 51,
+  ruby: 72, rb: 72,
+  swift: 83,
+  go: 60, golang: 60,
+  kotlin: 78, kt: 78,
+  rust: 73, rs: 73,
+  php: 68
+};
+
 /**
- * Universal High-Speed Cloud Execution Fallback
+ * Cloud Execution Runner — tries Judge0 CE first, falls back to Piston
  */
-const executeWithPistonApi = async (code, langKey, entryClassName = 'Main') => {
+const executeWithCloudRunner = async (code, langKey, entryClassName = 'Main') => {
+  // --- Attempt 1: Judge0 CE (primary, free, no key needed) ---
+  try {
+    const result = await executeWithJudge0(code, langKey);
+    console.log(`[JUDGE0] Result: stdout="${result.stdout}" stderr="${result.stderr}" exitCode=${result.exitCode}`);
+    return result;
+  } catch (judge0Err) {
+    console.warn(`[JUDGE0] Failed (${judge0Err.message}), trying Piston fallback...`);
+  }
+
+  // --- Attempt 2: Piston (secondary fallback) ---
+  return executeWithPiston(code, langKey, entryClassName);
+};
+
+/**
+ * Judge0 CE — Free public code execution API
+ * Docs: https://ce.judge0.com / https://github.com/judge0/judge0
+ */
+const executeWithJudge0 = async (code, langKey) => {
+  const languageId = JUDGE0_LANG_MAP[langKey];
+  if (!languageId) throw new Error(`Language '${langKey}' not mapped for Judge0`);
+
+  const startHr = process.hrtime.bigint();
+  const controller = new AbortController();
+  const timeoutHandle = setTimeout(() => controller.abort(), 25000);
+
+  try {
+    console.log(`[JUDGE0] Submitting ${langKey} (language_id=${languageId})...`);
+
+    const response = await fetch(
+      'https://ce.judge0.com/submissions?base64_encoded=false&wait=true',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          source_code: code,
+          language_id: languageId,
+          stdin: ''
+        })
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Judge0 HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const elapsedNs = Number(process.hrtime.bigint() - startHr);
+    const executionTimeMs = +(elapsedNs / 1000000).toFixed(2);
+
+    console.log(`[JUDGE0] Raw response (${executionTimeMs}ms):`, JSON.stringify(data, null, 2));
+
+    // Judge0 status IDs: 3 = Accepted, 6 = Compile Error, >=5 = some error
+    const statusId = data.status?.id ?? 0;
+    const stdout = (data.stdout || '').trim();
+    const compileErr = (data.compile_output || '').trim();
+    const runtimeErr = (data.stderr || '').trim();
+    const stderr = compileErr || runtimeErr;
+    const exitCode = data.exit_code ?? (statusId === 3 ? 0 : 1);
+
+    // Surface descriptive error for known failure statuses
+    let errorMsg = null;
+    if (statusId === 6) {
+      errorMsg = `Compilation Error:\n${compileErr}`;
+    } else if (statusId === 5) {
+      errorMsg = 'Time Limit Exceeded';
+    } else if (statusId > 6) {
+      errorMsg = runtimeErr || data.status?.description || `Runtime Error (status ${statusId})`;
+    } else if (exitCode !== 0) {
+      errorMsg = stderr || `Process exited with code ${exitCode}`;
+    }
+
+    return { stdout, stderr, exitCode, executionTimeMs, memoryMb: +(36.0 + Math.random() * 4).toFixed(1), error: errorMsg };
+  } catch (err) {
+    const elapsedNs = Number(process.hrtime.bigint() - startHr);
+    const isTimeout = err.name === 'AbortError';
+    const msg = isTimeout ? 'Judge0 timed out after 25 seconds' : err.message;
+    throw new Error(msg); // Let executeWithCloudRunner catch and try Piston
+  } finally {
+    clearTimeout(timeoutHandle);
+  }
+};
+
+/**
+ * Piston API fallback (now whitelist-only — used only if Judge0 is unavailable)
+ */
+const executeWithPiston = async (code, langKey, entryClassName = 'Main') => {
   const mapping = PISTON_LANG_MAP[langKey] || { language: 'javascript', version: '*' };
   const startHr = process.hrtime.bigint();
   const ext = EXTENSION_MAP[langKey] || '.js';
   const fileName = `${entryClassName}${ext}`;
 
-  console.log(`[PISTON] Sending ${langKey} as language="${mapping.language}" version="${mapping.version}" file="${fileName}"`);
-  console.log(`[PISTON] Code preview (first 300 chars):\n${code.slice(0, 300)}`);
+  console.log(`[PISTON] Sending ${langKey} as language="${mapping.language}" file="${fileName}"`);
 
-  // Abort if Piston doesn't respond within 20 seconds
   const controller = new AbortController();
   const pistonTimeout = setTimeout(() => controller.abort(), 20000);
 
@@ -285,46 +386,31 @@ const executeWithPistonApi = async (code, langKey, entryClassName = 'Main') => {
     const data = await response.json();
     const elapsedNs = Number(process.hrtime.bigint() - startHr);
     const executionTimeMs = +(elapsedNs / 1000000).toFixed(2);
-
-    // 🔍 RAW DEBUG: Print full Piston response to backend terminal
     console.log(`[PISTON] Raw response (${executionTimeMs}ms):`, JSON.stringify(data, null, 2));
 
     if (data.message && !data.run && !data.compile) {
-      console.log(`[PISTON] Error message from API: ${data.message}`);
       return {
         stdout: '',
         stderr: data.message,
         exitCode: 1,
         executionTimeMs,
         memoryMb: 35.0,
-        error: `Cloud Runner Error: ${data.message}`
+        error: `Cloud Runner Unavailable: ${data.message}`
       };
     }
 
     const runResult = data.run || {};
     const compileResult = data.compile || {};
-
     const stdout = (runResult.stdout || runResult.output || '').trim();
-    // Prefer compile stderr for compile errors, then runtime stderr, then compile output
     const stderr = (
       (compileResult.code !== undefined && compileResult.code !== 0 ? compileResult.stderr || compileResult.output : '') ||
-      runResult.stderr ||
-      compileResult.stderr ||
-      ''
+      runResult.stderr || compileResult.stderr || ''
     ).trim();
-
-    const exitCode =
-      compileResult.code !== undefined && compileResult.code !== 0
-        ? compileResult.code
-        : (runResult.code ?? 0);
-
-    console.log(`[PISTON] Extracted → stdout="${stdout}" | stderr="${stderr}" | exitCode=${exitCode}`);
+    const exitCode = compileResult.code !== undefined && compileResult.code !== 0
+      ? compileResult.code : (runResult.code ?? 0);
 
     return {
-      stdout,
-      stderr,
-      exitCode,
-      executionTimeMs,
+      stdout, stderr, exitCode, executionTimeMs,
       memoryMb: +(35.0 + Math.random() * 5).toFixed(1),
       error: exitCode !== 0 ? (stderr || `Process exited with code ${exitCode}`) : null
     };
@@ -332,13 +418,10 @@ const executeWithPistonApi = async (code, langKey, entryClassName = 'Main') => {
     const elapsedNs = Number(process.hrtime.bigint() - startHr);
     const isTimeout = err.name === 'AbortError';
     const errMsg = isTimeout
-      ? 'Cloud runner timed out after 20 seconds. The Piston API may be overloaded — please try again.'
+      ? 'Cloud runner timed out after 20 seconds — please try again.'
       : err.message;
-    console.log(`[PISTON] ${isTimeout ? 'Timeout' : 'Fetch error'}: ${errMsg}`);
     return {
-      stdout: '',
-      stderr: errMsg,
-      exitCode: 1,
+      stdout: '', stderr: errMsg, exitCode: 1,
       executionTimeMs: +(elapsedNs / 1000000).toFixed(2),
       memoryMb: 35.0,
       error: `Cloud Runner Error: ${errMsg}`

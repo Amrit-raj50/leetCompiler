@@ -8,8 +8,10 @@ import SubmissionDetails from './components/SubmissionDetails';
 import ModeSelector from './components/ModeSelector';
 import ProblemList from './components/ProblemList';
 import FeedbackModal from './components/FeedbackModal';
+import InputModal from './components/InputModal';
 import { runCodeApi, saveCodeApi } from './services/compilerService';
 import { parseFrontendError } from './utils/errorParser';
+import { detectInputRequirements } from './utils/inputDetector';
 import { PROBLEMS, STANDALONE_DEFAULT_CODE } from './constants/questions';
 import { CODE_TEMPLATES } from './constants/templates';
 
@@ -63,6 +65,11 @@ function App() {
     return parseInt(localStorage.getItem('leetcompiler_run_count') || '0', 10);
   });
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+
+  // Input requirements modal state
+  const [isInputModalOpen, setIsInputModalOpen] = useState(false);
+  const [detectedPrompts, setDetectedPrompts] = useState([]);
+  const [pendingRunOptions, setPendingRunOptions] = useState(null);
 
   // Handle Mode Selection from Landing Screen
   const handleSelectMode = (targetView, token = '') => {
@@ -166,6 +173,18 @@ function App() {
   // Run Code Handler
   const handleRunCode = async (options = {}) => {
     const isSubmit = options?.isSubmit === true;
+    const explicitStdin = options?.stdin !== undefined ? options.stdin : stdin;
+
+    // Check if code requires input and user hasn't supplied it via modal or custom tab yet
+    if (!options?.bypassInputCheck && mode === 'standalone') {
+      const { requiresInput, prompts } = detectInputRequirements(code, lang);
+      if (requiresInput && (!explicitStdin || explicitStdin.trim() === '')) {
+        setDetectedPrompts(prompts);
+        setPendingRunOptions(options);
+        setIsInputModalOpen(true);
+        return;
+      }
+    }
 
     if (isRunning) return;
 
@@ -202,7 +221,7 @@ function App() {
         language: lang,
         questionSlug,
         testCases,
-        stdin,
+        stdin: explicitStdin,
       });
 
       setExecResult(result);
@@ -295,6 +314,24 @@ function App() {
         onClose={() => setIsFeedbackOpen(false)}
         mode={mode}
         runCount={runCount}
+      />
+
+      {/* Input Prompts Modal when code needs input */}
+      <InputModal
+        isOpen={isInputModalOpen}
+        onClose={() => setIsInputModalOpen(false)}
+        onSubmit={(submittedStdin) => {
+          setStdin(submittedStdin);
+          setIsInputModalOpen(false);
+          handleRunCode({
+            ...(pendingRunOptions || {}),
+            stdin: submittedStdin,
+            bypassInputCheck: true
+          });
+        }}
+        prompts={detectedPrompts}
+        initialStdin={stdin}
+        lang={lang}
       />
 
       {/* 1. Landing Screen: Mode Selector */}

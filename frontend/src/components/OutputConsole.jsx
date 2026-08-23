@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const OutputConsole = ({
+const OutputConsole = React.forwardRef(({
   activeTab,
   setActiveTab,
   output,
@@ -31,7 +31,7 @@ const OutputConsole = ({
   testCases = [],
   onUpdateTestCase,
   style
-}) => {
+}, ref) => {
   const [selectedCaseIndex, setSelectedCaseIndex] = useState(0);
   const [showRawTrace, setShowRawTrace] = useState(false);
   const [copiedTrace, setCopiedTrace] = useState(false);
@@ -48,7 +48,7 @@ const OutputConsole = ({
   };
 
   return (
-    <div className="console-pane" style={style}>
+    <div className="console-pane" ref={ref} style={style}>
       {/* Combined Header & Tabs */}
       <div className="tabs-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '2px solid var(--sketch-border)', backgroundColor: 'rgba(0,0,0,0.02)' }}>
         <div style={{ display: 'flex' }}>
@@ -130,7 +130,7 @@ const OutputConsole = ({
                 ) : (
                   <>
                     {/* Case Buttons */}
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', height: 'var(--grid-size)', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', alignItems: 'center', WebkitOverflowScrolling: 'touch' }}>
                       {testCases.map((tc, index) => (
                         <button
                           key={index}
@@ -145,7 +145,9 @@ const OutputConsole = ({
                             backgroundColor: selectedCaseIndex === index ? 'rgba(0,0,0,0.08)' : 'transparent',
                             fontWeight: selectedCaseIndex === index ? 700 : 500,
                             cursor: 'pointer',
-                            color: 'var(--text-ink)'
+                            color: 'var(--text-ink)',
+                            whiteSpace: 'nowrap',
+                            flexShrink: 0
                           }}
                         >
                           Case {index + 1}
@@ -155,35 +157,37 @@ const OutputConsole = ({
 
                     {/* Active Test Case Inputs */}
                     {currentCase && (
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px' }}>
                         {Object.entries(currentCase.input || {}).map(([key, val]) => (
-                          <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '8px', lineHeight: 'var(--grid-size)' }}>
+                          <div key={key} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontFamily: 'var(--font-hand)' }}>
                               {key} =
                             </span>
                             <span style={{
                               fontFamily: 'var(--font-mono)',
-                              fontSize: '1.1rem',
+                              fontSize: '1.05rem',
                               color: 'var(--text-ink)',
-                              fontWeight: 600
+                              fontWeight: 600,
+                              wordBreak: 'break-all'
                             }}>
                               {JSON.stringify(val)}
                             </span>
                           </div>
                         ))}
 
-                        {currentCase.expectedOutput !== undefined && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', lineHeight: 'var(--grid-size)' }}>
+                        {(currentCase.expected !== undefined || currentCase.expectedOutput !== undefined) && (
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
                             <span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontFamily: 'var(--font-hand)' }}>
                               Expected Output =
                             </span>
                             <span style={{
                               fontFamily: 'var(--font-mono)',
-                              fontSize: '1.1rem',
+                              fontSize: '1.05rem',
                               color: '#16a34a',
-                              fontWeight: 600
+                              fontWeight: 600,
+                              wordBreak: 'break-all'
                             }}>
-                              {JSON.stringify(currentCase.expectedOutput)}
+                              {JSON.stringify(currentCase.expected !== undefined ? currentCase.expected : currentCase.expectedOutput)}
                             </span>
                           </div>
                         )}
@@ -215,7 +219,11 @@ const OutputConsole = ({
                       fontFamily: 'var(--font-hand)'
                     }}>
                       <CheckCircle2 size={22} />
-                      <span>All Test Cases Passed!</span>
+                      <span>
+                        {execResult?.results && execResult.results.length > 0
+                          ? 'All Test Cases Passed!'
+                          : 'Execution Succeeded'}
+                      </span>
                     </div>
                   ) : execResult?.error ? (
                     <div style={{
@@ -500,53 +508,67 @@ const OutputConsole = ({
                     <div style={{ fontSize: '1.1rem', fontWeight: 700, fontFamily: 'var(--font-hand)' }}>
                       Test Case Breakdown:
                     </div>
-                    {execResult.results.map((res) => (
-                      <div
-                        key={res.caseIndex}
-                        className="sketch-box"
-                        style={{
-                          padding: '12px 16px',
-                          borderLeft: `5px solid ${res.passed ? '#16a34a' : '#dc2626'}`,
-                          backgroundColor: res.passed ? 'rgba(34, 197, 94, 0.04)' : 'rgba(239, 68, 68, 0.04)'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {res.passed ? (
-                              <CheckCircle2 size={18} style={{ color: '#16a34a' }} />
-                            ) : (
-                              <XCircle size={18} style={{ color: '#dc2626' }} />
-                            )}
-                            <span style={{ fontWeight: 700, fontFamily: 'var(--font-hand)', fontSize: '1.1rem' }}>
-                              Case {res.caseIndex}
+                    {execResult.results.map((res, index) => {
+                      const caseNumber = res.testCase ?? res.caseIndex ?? (index + 1);
+                      const timeFormatted = res.timeMs !== undefined
+                        ? `${res.timeMs} ms`
+                        : (res.executionTimeFormatted || `${res.executionTimeMs || 0} ms`);
+                      return (
+                        <div
+                          key={caseNumber}
+                          className="sketch-box"
+                          style={{
+                            padding: '12px 16px',
+                            borderLeft: `5px solid ${res.passed ? '#16a34a' : '#dc2626'}`,
+                            backgroundColor: res.passed ? 'rgba(34, 197, 94, 0.04)' : 'rgba(239, 68, 68, 0.04)'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              {res.passed ? (
+                                <CheckCircle2 size={18} style={{ color: '#16a34a' }} />
+                              ) : (
+                                <XCircle size={18} style={{ color: '#dc2626' }} />
+                              )}
+                              <span style={{ fontWeight: 700, fontFamily: 'var(--font-hand)', fontSize: '1.1rem' }}>
+                                Case {caseNumber}
+                              </span>
+                            </div>
+                            <span style={{
+                              fontSize: '0.85rem',
+                              fontFamily: 'var(--font-mono)',
+                              color: res.passed ? '#15803d' : '#b91c1c',
+                              fontWeight: 600
+                            }}>
+                              {res.passed ? 'PASSED' : 'FAILED'} ({timeFormatted})
                             </span>
                           </div>
-                          <span style={{
-                            fontSize: '0.85rem',
-                            fontFamily: 'var(--font-mono)',
-                            color: res.passed ? '#15803d' : '#b91c1c',
-                            fontWeight: 600
-                          }}>
-                            {res.passed ? 'PASSED' : 'FAILED'} ({res.executionTimeFormatted || `${res.executionTimeMs} ms`})
-                          </span>
-                        </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px', fontSize: '0.9rem', fontFamily: 'var(--font-mono)' }}>
-                          <div>
-                            <span style={{ color: 'var(--text-muted)' }}>Input: </span>
-                            <span>{JSON.stringify(res.input)}</span>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px', fontSize: '0.9rem', fontFamily: 'var(--font-mono)' }}>
+                            <div style={{ wordBreak: 'break-all' }}>
+                              <span style={{ color: 'var(--text-muted)' }}>Input: </span>
+                              <span>{JSON.stringify(res.input)}</span>
+                            </div>
+                            <div style={{ wordBreak: 'break-all' }}>
+                              <span style={{ color: 'var(--text-muted)' }}>Expected: </span>
+                              <span style={{ color: '#16a34a', fontWeight: 600 }}>{JSON.stringify(res.expected)}</span>
+                            </div>
+                            <div style={{ wordBreak: 'break-all' }}>
+                              <span style={{ color: 'var(--text-muted)' }}>Your Output: </span>
+                              <span style={{ color: res.passed ? '#16a34a' : '#dc2626', fontWeight: 600 }}>
+                                {res.actual !== undefined ? (typeof res.actual === 'object' ? JSON.stringify(res.actual) : String(res.actual)) : 'null'}
+                              </span>
+                            </div>
                           </div>
-                          <div>
-                            <span style={{ color: 'var(--text-muted)' }}>Expected: </span>
-                            <span style={{ color: '#16a34a', fontWeight: 600 }}>{JSON.stringify(res.expected)}</span>
-                          </div>
-                          <div>
-                            <span style={{ color: 'var(--text-muted)' }}>Your Output: </span>
-                            <span style={{ color: res.passed ? '#16a34a' : '#dc2626', fontWeight: 600 }}>{JSON.stringify(res.actual)}</span>
-                          </div>
+
+                          {res.error && (
+                            <div style={{ marginTop: '8px', padding: '6px 10px', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: '4px', border: '1px solid #fca5a5', color: '#991b1b', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', wordBreak: 'break-all' }}>
+                              <strong>Error: </strong>{res.error}
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -556,6 +578,8 @@ const OutputConsole = ({
       </div>
     </div>
   );
-};
+});
+
+OutputConsole.displayName = 'OutputConsole';
 
 export default OutputConsole;

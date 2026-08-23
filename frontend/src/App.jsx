@@ -35,6 +35,7 @@ function App() {
 
   const [editorFlex, setEditorFlex] = useState(66); // Default to 2/3 ratio (similar to original flex: 2 vs flex: 1)
   const workspaceRef = useRef(null);
+  const consoleRef = useRef(null);
 
   const startResizing = (e) => {
     e.preventDefault();
@@ -171,6 +172,13 @@ function App() {
     setActiveConsoleTab('output');
     setOutput('⏳ Running code on LeetCompiler server...');
     setExecResult(null);
+
+    // Auto scroll to console on mobile for instant visual feedback
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      setTimeout(() => {
+        consoleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
 
     const questionSlug = mode === 'integrated' ? currentProblem.slug : 'scratchpad';
     const testCases = mode === 'integrated' ? currentProblem.testCases : [];
@@ -391,6 +399,7 @@ function App() {
                   <div style={{ width: '40px', height: '2px', backgroundColor: '#334155', borderRadius: '1px' }} />
                 </div>
                 <OutputConsole
+                  ref={consoleRef}
                   style={{ flex: `${100 - editorFlex} 1 0%` }}
                   activeTab={activeConsoleTab}
                   setActiveTab={setActiveConsoleTab}
@@ -437,6 +446,7 @@ function App() {
                   <div style={{ width: '40px', height: '2px', backgroundColor: '#334155', borderRadius: '1px' }} />
                 </div>
                 <OutputConsole
+                  ref={consoleRef}
                   style={{ flex: `${100 - editorFlex} 1 0%` }}
                   activeTab={activeConsoleTab}
                   setActiveTab={setActiveConsoleTab}

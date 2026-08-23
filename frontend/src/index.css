@@ -643,6 +643,17 @@ body {
     padding: 6px 14px !important;
     font-size: 1.15rem !important;
   }
+
+  /* Testcase card and text wrapping on mobile */
+  .console-pane .pane-content {
+    overflow-x: hidden !important;
+    word-break: break-word !important;
+  }
+
+  .sketch-box {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -663,7 +674,10 @@ body {
     font-size: 1rem !important;
     padding: 0 10px !important;
   }
+
+  .left-pane .pane-content,
+  .console-pane .pane-content {
+    padding-left: 20px !important;
+    padding-right: 10px !important;
+  }
 }
-
-
-

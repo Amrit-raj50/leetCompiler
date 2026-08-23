@@ -24,28 +24,28 @@ const TIMEOUT_MS = parseInt(process.env.EXECUTION_TIMEOUT_MS, 10) || 6000;
 
 // Universal language configuration & fallbacks
 const PISTON_LANG_MAP = {
-  javascript: { language: 'javascript', version: '18.15.0' },
-  js: { language: 'javascript', version: '18.15.0' },
-  python: { language: 'python', version: '3.10.0' },
-  python3: { language: 'python', version: '3.10.0' },
-  py: { language: 'python', version: '3.10.0' },
-  java: { language: 'java', version: '15.0.2' },
-  cpp: { language: 'c++', version: '10.2.0' },
-  'c++': { language: 'c++', version: '10.2.0' },
-  c: { language: 'c', version: '10.2.0' },
-  csharp: { language: 'csharp.net', version: '6.12.0' },
-  'c#': { language: 'csharp.net', version: '6.12.0' },
-  cs: { language: 'csharp.net', version: '6.12.0' },
-  ruby: { language: 'ruby', version: '3.0.1' },
-  rb: { language: 'ruby', version: '3.0.1' },
-  swift: { language: 'swift', version: '5.3.3' },
-  go: { language: 'go', version: '1.16.2' },
-  golang: { language: 'go', version: '1.16.2' },
-  kotlin: { language: 'kotlin', version: '1.8.20' },
-  kt: { language: 'kotlin', version: '1.8.20' },
-  rust: { language: 'rust', version: '1.68.2' },
-  rs: { language: 'rust', version: '1.68.2' },
-  php: { language: 'php', version: '8.2.3' }
+  javascript: { language: 'javascript', version: '*' },
+  js: { language: 'javascript', version: '*' },
+  python: { language: 'python', version: '*' },
+  python3: { language: 'python', version: '*' },
+  py: { language: 'python', version: '*' },
+  java: { language: 'java', version: '*' },
+  cpp: { language: 'c++', version: '*' },
+  'c++': { language: 'c++', version: '*' },
+  c: { language: 'c', version: '*' },
+  csharp: { language: 'csharp.net', version: '*' },
+  'c#': { language: 'csharp.net', version: '*' },
+  cs: { language: 'csharp.net', version: '*' },
+  ruby: { language: 'ruby', version: '*' },
+  rb: { language: 'ruby', version: '*' },
+  swift: { language: 'swift', version: '*' },
+  go: { language: 'go', version: '*' },
+  golang: { language: 'go', version: '*' },
+  kotlin: { language: 'kotlin', version: '*' },
+  kt: { language: 'kotlin', version: '*' },
+  rust: { language: 'rust', version: '*' },
+  rs: { language: 'rust', version: '*' },
+  php: { language: 'php', version: '*' }
 };
 
 const EXTENSION_MAP = {
@@ -81,20 +81,95 @@ export const runCode = async (code, language = 'javascript', questionSlug = 'two
   const langKey = (language || 'javascript').toLowerCase().trim();
   const ext = EXTENSION_MAP[langKey] || '.js';
   const fileId = uuidv4().replace(/-/g, '_');
-  
   const isJava = ext === '.java';
-  const baseFileName = isJava ? `Solution_${fileId}` : `code_${fileId}`;
-  
-  let codeToRun = code;
-  if (isJava && code.includes('class Solution')) {
-    codeToRun = code.replace(/class\s+Solution\b/, `class ${baseFileName}`);
+
+  const harnessResult = generateHarnessCode(code, langKey, questionSlug, testCases);
+  let wrappedCode = harnessResult.wrappedCode;
+  const isHarness = harnessResult.isHarness;
+
+  // For Java, use an isolated subdirectory to prevent class collision and allow proper public class names
+  const runDir = isJava ? path.join(TEMP_DIR, `run_${fileId}`) : TEMP_DIR;
+  if (isJava) {
+    await fs.mkdir(runDir, { recursive: true });
   }
 
-  const { wrappedCode } = generateHarnessCode(codeToRun, langKey, questionSlug, testCases);
+  let baseFileName = `code_${fileId}`;
+  let entryClassName = baseFileName;
 
-  const filePath = path.join(TEMP_DIR, `${baseFileName}${ext}`);
-  const outBinaryPath = path.join(TEMP_DIR, `bin_${fileId}${process.platform === 'win32' ? '.exe' : ''}`);
-  const jarPath = path.join(TEMP_DIR, `jar_${fileId}.jar`);
+  if (isJava) {
+    if (isHarness) {
+      baseFileName = harnessResult.entryClassName || 'SolutionRunner';
+      entryClassName = baseFileName;
+    } else {
+      // Standalone Scratchpad Java: Detect public class or class name
+      // Match: class Foo, public class Foo, abstract class Foo, final class Foo, etc.
+      const classMatch = code.match(/(?:public\s+|abstract\s+|final\s+)*class\s+([A-Za-z0-9_$]+)/);
+      if (classMatch) {
+        // Code already has a class declaration
+        baseFileName = classMatch[1];
+        entryClassName = classMatch[1];
+
+        const hasMain = /public\s+static\s+void\s+main\s*\(\s*String/.test(code) ||
+                        /static\s+public\s+void\s+main\s*\(\s*String/.test(code);
+
+        if (!hasMain) {
+          // No main method — inject a synthetic one that calls the first public method
+          // and prints its return value, so standalone execution always produces output.
+          const syntheticMain = `
+  // Auto-generated main for standalone execution
+  public static void main(String[] args) {
+    try {
+      ${baseFileName} obj = new ${baseFileName}();
+      java.lang.reflect.Method[] methods = ${baseFileName}.class.getDeclaredMethods();
+      java.lang.reflect.Method target = null;
+      for (java.lang.reflect.Method m : methods) {
+        if (java.lang.reflect.Modifier.isPublic(m.getModifiers()) && !m.getName().equals("main")) {
+          target = m; break;
+        }
+      }
+      if (target != null && target.getParameterCount() == 0) {
+        Object result = target.invoke(obj);
+        System.out.println(result);
+      } else {
+        System.out.println("[Hint] Class '${baseFileName}' compiled OK. Add a main() method or use \"Run with Test Cases\" to test your solution.");
+      }
+    } catch (Throwable t) {
+      System.out.println("[Runtime Error] " + t.getMessage());
+    }
+  }`;
+          // Insert the synthetic main before the last closing brace of the class
+          const lastBrace = wrappedCode.lastIndexOf('}');
+          if (lastBrace !== -1) {
+            wrappedCode = wrappedCode.slice(0, lastBrace) + syntheticMain + '\n}';
+          }
+        }
+
+        // Ensure it's a public class so javac can execute it by name
+        if (!/public\s+class\s+/.test(wrappedCode)) {
+          wrappedCode = wrappedCode.replace(
+            /(?:^|\b)((?:abstract\s+|final\s+)*)class\s+/,
+            '$1public class '
+          );
+        }
+      } else {
+        // No class declaration at all — auto-wrap the code snippet
+        baseFileName = 'Main';
+        entryClassName = 'Main';
+        const hasMainMethod = code.includes('public static void main') || code.includes('static void main');
+        if (hasMainMethod) {
+          // Code snippet already contains a main method body — wrap it in a class
+          wrappedCode = `import java.util.*;\nimport java.io.*;\n\npublic class Main {\n${code}\n}`;
+        } else {
+          // Pure expression/statement snippet — wrap it with a main method too
+          wrappedCode = `import java.util.*;\nimport java.io.*;\n\npublic class Main {\n  public static void main(String[] args) {\n${code.split('\n').map(l => '    ' + l).join('\n')}\n  }\n}`;
+        }
+      }
+    }
+  }
+
+  const filePath = path.join(runDir, `${baseFileName}${ext}`);
+  const outBinaryPath = path.join(runDir, `bin_${fileId}${process.platform === 'win32' ? '.exe' : ''}`);
+  const jarPath = path.join(runDir, `jar_${fileId}.jar`);
 
   try {
     await fs.writeFile(filePath, wrappedCode, 'utf8');
@@ -105,31 +180,35 @@ export const runCode = async (code, language = 'javascript', questionSlug = 'two
       langKey,
       fileId,
       baseFileName,
+      entryClassName,
+      runDir,
       outBinaryPath,
       jarPath,
       timeoutMs: TIMEOUT_MS
     });
 
-    // If local runner failed due to missing CLI (like javac not installed on Render), run via cloud engine
-    if (
+    // If local runner failed due to missing CLI tool (e.g. javac not on server), route to cloud runner
+    const isLocalToolMissing =
       execResult?.error &&
       (
         execResult.error.includes('not installed') ||
         execResult.error.includes('not in system PATH') ||
-        execResult.error.includes('not found') ||
         execResult.error.includes('ENOENT') ||
-        execResult.error.includes('cannot find') ||
-        isJava || ext === '.rs' || ext === '.kt' || ext === '.swift' || ext === '.cs'
-      )
-    ) {
+        execResult.error.includes('is not recognized as an internal or external command') ||
+        execResult.error.includes('command not found') ||
+        execResult.error.includes('spawn ')
+      );
+
+    if (isLocalToolMissing) {
       try {
         console.log(`🌐 Routing execution for ${langKey.toUpperCase()} via cloud runner...`);
-        const fallbackResult = await executeWithPistonApi(wrappedCode, langKey);
-        if (fallbackResult && (fallbackResult.stdout || fallbackResult.stderr || fallbackResult.exitCode === 0)) {
+        const fallbackResult = await executeWithPistonApi(wrappedCode, langKey, entryClassName);
+        // Use the cloud result if the call succeeded (even if output is empty)
+        if (fallbackResult) {
           execResult = fallbackResult;
         }
       } catch (cloudErr) {
-        console.error('Cloud runner error:', cloudErr);
+        console.error('Cloud runner error:', cloudErr.message);
       }
     }
 
@@ -158,12 +237,15 @@ export const runCode = async (code, language = 'javascript', questionSlug = 'two
       diagnostics
     };
   } finally {
-    // Cleanup temporary files
-    cleanupFile(filePath);
-    cleanupFile(outBinaryPath);
-    cleanupFile(jarPath);
-    if (isJava) {
-      cleanupFile(path.join(TEMP_DIR, `${baseFileName}.class`));
+    // Cleanup temporary files / directory
+    if (isJava && runDir !== TEMP_DIR) {
+      try {
+        await fs.rm(runDir, { recursive: true, force: true });
+      } catch (e) {}
+    } else {
+      cleanupFile(filePath);
+      cleanupFile(outBinaryPath);
+      cleanupFile(jarPath);
     }
   }
 };
@@ -171,39 +253,95 @@ export const runCode = async (code, language = 'javascript', questionSlug = 'two
 /**
  * Universal High-Speed Cloud Execution Fallback
  */
-const executeWithPistonApi = async (code, langKey) => {
-  const mapping = PISTON_LANG_MAP[langKey] || { language: 'javascript', version: '18.15.0' };
+const executeWithPistonApi = async (code, langKey, entryClassName = 'Main') => {
+  const mapping = PISTON_LANG_MAP[langKey] || { language: 'javascript', version: '*' };
   const startHr = process.hrtime.bigint();
+  const ext = EXTENSION_MAP[langKey] || '.js';
+  const fileName = `${entryClassName}${ext}`;
 
-  const response = await fetch('https://emkc.org/api/v2/piston/execute', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      language: mapping.language,
-      version: mapping.version,
-      files: [{ content: code }]
-    })
-  });
+  console.log(`[PISTON] Sending ${langKey} as language="${mapping.language}" version="${mapping.version}" file="${fileName}"`);
+  console.log(`[PISTON] Code preview (first 300 chars):\n${code.slice(0, 300)}`);
 
-  const data = await response.json();
-  const elapsedNs = Number(process.hrtime.bigint() - startHr);
-  const executionTimeMs = +(elapsedNs / 1000000).toFixed(2);
+  // Abort if Piston doesn't respond within 20 seconds
+  const controller = new AbortController();
+  const pistonTimeout = setTimeout(() => controller.abort(), 20000);
 
-  const runResult = data.run || {};
-  const compileResult = data.compile || {};
+  try {
+    const response = await fetch('https://emkc.org/api/v2/piston/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        language: mapping.language,
+        version: mapping.version || '*',
+        files: [{ name: fileName, content: code }]
+      })
+    });
 
-  const stdout = runResult.stdout || '';
-  const stderr = compileResult.stderr || runResult.stderr || '';
-  const exitCode = compileResult.code !== undefined && compileResult.code !== 0 ? compileResult.code : (runResult.code ?? 0);
+    const data = await response.json();
+    const elapsedNs = Number(process.hrtime.bigint() - startHr);
+    const executionTimeMs = +(elapsedNs / 1000000).toFixed(2);
 
-  return {
-    stdout: stdout.trim(),
-    stderr: stderr.trim(),
-    exitCode,
-    executionTimeMs,
-    memoryMb: +(35.0 + Math.random() * 5).toFixed(1),
-    error: exitCode !== 0 ? (stderr || `Process exited with code ${exitCode}`) : null
-  };
+    // 🔍 RAW DEBUG: Print full Piston response to backend terminal
+    console.log(`[PISTON] Raw response (${executionTimeMs}ms):`, JSON.stringify(data, null, 2));
+
+    if (data.message && !data.run && !data.compile) {
+      console.log(`[PISTON] Error message from API: ${data.message}`);
+      return {
+        stdout: '',
+        stderr: data.message,
+        exitCode: 1,
+        executionTimeMs,
+        memoryMb: 35.0,
+        error: `Cloud Runner Error: ${data.message}`
+      };
+    }
+
+    const runResult = data.run || {};
+    const compileResult = data.compile || {};
+
+    const stdout = (runResult.stdout || runResult.output || '').trim();
+    // Prefer compile stderr for compile errors, then runtime stderr, then compile output
+    const stderr = (
+      (compileResult.code !== undefined && compileResult.code !== 0 ? compileResult.stderr || compileResult.output : '') ||
+      runResult.stderr ||
+      compileResult.stderr ||
+      ''
+    ).trim();
+
+    const exitCode =
+      compileResult.code !== undefined && compileResult.code !== 0
+        ? compileResult.code
+        : (runResult.code ?? 0);
+
+    console.log(`[PISTON] Extracted → stdout="${stdout}" | stderr="${stderr}" | exitCode=${exitCode}`);
+
+    return {
+      stdout,
+      stderr,
+      exitCode,
+      executionTimeMs,
+      memoryMb: +(35.0 + Math.random() * 5).toFixed(1),
+      error: exitCode !== 0 ? (stderr || `Process exited with code ${exitCode}`) : null
+    };
+  } catch (err) {
+    const elapsedNs = Number(process.hrtime.bigint() - startHr);
+    const isTimeout = err.name === 'AbortError';
+    const errMsg = isTimeout
+      ? 'Cloud runner timed out after 20 seconds. The Piston API may be overloaded — please try again.'
+      : err.message;
+    console.log(`[PISTON] ${isTimeout ? 'Timeout' : 'Fetch error'}: ${errMsg}`);
+    return {
+      stdout: '',
+      stderr: errMsg,
+      exitCode: 1,
+      executionTimeMs: +(elapsedNs / 1000000).toFixed(2),
+      memoryMb: 35.0,
+      error: `Cloud Runner Error: ${errMsg}`
+    };
+  } finally {
+    clearTimeout(pistonTimeout);
+  }
 };
 
 /**
@@ -215,6 +353,8 @@ const executeLanguageFile = async ({
   langKey,
   fileId,
   baseFileName,
+  entryClassName = baseFileName,
+  runDir = TEMP_DIR,
   outBinaryPath,
   jarPath,
   timeoutMs
@@ -224,7 +364,7 @@ const executeLanguageFile = async ({
   // 1. JavaScript (Node.js)
   if (ext === '.js') {
     return new Promise((resolve) => {
-      runSubprocess('node', [filePath], timeoutMs, startHrTime, resolve);
+      runSubprocess('node', [filePath], timeoutMs, startHrTime, resolve, runDir);
     });
   }
 
@@ -232,7 +372,7 @@ const executeLanguageFile = async ({
   if (ext === '.py') {
     return new Promise((resolve) => {
       const pyCmd = process.platform === 'win32' ? 'python' : 'python3';
-      runSubprocess(pyCmd, [filePath], timeoutMs, startHrTime, resolve);
+      runSubprocess(pyCmd, [filePath], timeoutMs, startHrTime, resolve, runDir);
     });
   }
 
@@ -240,7 +380,7 @@ const executeLanguageFile = async ({
   if (ext === '.cpp') {
     return new Promise((resolve) => {
       const compileCmd = `g++ -O2 -std=c++17 "${filePath}" -o "${outBinaryPath}"`;
-      exec(compileCmd, { timeout: timeoutMs }, (compileErr, compileStdout, compileStderr) => {
+      exec(compileCmd, { timeout: timeoutMs, cwd: runDir }, (compileErr, compileStdout, compileStderr) => {
         if (compileErr) {
           const elapsedNs = Number(process.hrtime.bigint() - startHrTime);
           resolve({
@@ -253,7 +393,7 @@ const executeLanguageFile = async ({
           });
           return;
         }
-        runSubprocess(outBinaryPath, [], timeoutMs, startHrTime, resolve);
+        runSubprocess(outBinaryPath, [], timeoutMs, startHrTime, resolve, runDir);
       });
     });
   }
@@ -262,7 +402,7 @@ const executeLanguageFile = async ({
   if (ext === '.c') {
     return new Promise((resolve) => {
       const compileCmd = `gcc -O2 "${filePath}" -o "${outBinaryPath}"`;
-      exec(compileCmd, { timeout: timeoutMs }, (compileErr, compileStdout, compileStderr) => {
+      exec(compileCmd, { timeout: timeoutMs, cwd: runDir }, (compileErr, compileStdout, compileStderr) => {
         if (compileErr) {
           const elapsedNs = Number(process.hrtime.bigint() - startHrTime);
           resolve({
@@ -275,7 +415,7 @@ const executeLanguageFile = async ({
           });
           return;
         }
-        runSubprocess(outBinaryPath, [], timeoutMs, startHrTime, resolve);
+        runSubprocess(outBinaryPath, [], timeoutMs, startHrTime, resolve, runDir);
       });
     });
   }
@@ -284,7 +424,7 @@ const executeLanguageFile = async ({
   if (ext === '.java') {
     return new Promise((resolve) => {
       const compileCmd = `javac "${filePath}"`;
-      exec(compileCmd, { timeout: timeoutMs, cwd: TEMP_DIR }, (compileErr, compileStdout, compileStderr) => {
+      exec(compileCmd, { timeout: timeoutMs, cwd: runDir }, (compileErr, compileStdout, compileStderr) => {
         if (compileErr) {
           const elapsedNs = Number(process.hrtime.bigint() - startHrTime);
           resolve({
@@ -297,7 +437,7 @@ const executeLanguageFile = async ({
           });
           return;
         }
-        runSubprocess('java', ['-cp', TEMP_DIR, baseFileName], timeoutMs, startHrTime, resolve);
+        runSubprocess('java', ['-cp', '.', entryClassName], timeoutMs, startHrTime, resolve, runDir);
       });
     });
   }
@@ -305,7 +445,7 @@ const executeLanguageFile = async ({
   // 6. Go (Golang)
   if (ext === '.go') {
     return new Promise((resolve) => {
-      runSubprocess('go', ['run', filePath], timeoutMs, startHrTime, resolve);
+      runSubprocess('go', ['run', filePath], timeoutMs, startHrTime, resolve, runDir);
     });
   }
 
@@ -313,7 +453,7 @@ const executeLanguageFile = async ({
   if (ext === '.rs') {
     return new Promise((resolve) => {
       const compileCmd = `rustc "${filePath}" -o "${outBinaryPath}"`;
-      exec(compileCmd, { timeout: timeoutMs }, (compileErr, compileStdout, compileStderr) => {
+      exec(compileCmd, { timeout: timeoutMs, cwd: runDir }, (compileErr, compileStdout, compileStderr) => {
         if (compileErr) {
           const elapsedNs = Number(process.hrtime.bigint() - startHrTime);
           resolve({
@@ -326,7 +466,7 @@ const executeLanguageFile = async ({
           });
           return;
         }
-        runSubprocess(outBinaryPath, [], timeoutMs, startHrTime, resolve);
+        runSubprocess(outBinaryPath, [], timeoutMs, startHrTime, resolve, runDir);
       });
     });
   }
@@ -334,21 +474,21 @@ const executeLanguageFile = async ({
   // 8. PHP
   if (ext === '.php') {
     return new Promise((resolve) => {
-      runSubprocess('php', [filePath], timeoutMs, startHrTime, resolve);
+      runSubprocess('php', [filePath], timeoutMs, startHrTime, resolve, runDir);
     });
   }
 
   // 9. Ruby
   if (ext === '.rb') {
     return new Promise((resolve) => {
-      runSubprocess('ruby', [filePath], timeoutMs, startHrTime, resolve);
+      runSubprocess('ruby', [filePath], timeoutMs, startHrTime, resolve, runDir);
     });
   }
 
   // 10. Swift
   if (ext === '.swift') {
     return new Promise((resolve) => {
-      runSubprocess('swift', [filePath], timeoutMs, startHrTime, resolve);
+      runSubprocess('swift', [filePath], timeoutMs, startHrTime, resolve, runDir);
     });
   }
 
@@ -356,7 +496,7 @@ const executeLanguageFile = async ({
   if (ext === '.kt') {
     return new Promise((resolve) => {
       const compileCmd = `kotlinc "${filePath}" -include-runtime -d "${jarPath}"`;
-      exec(compileCmd, { timeout: timeoutMs }, (compileErr, compileStdout, compileStderr) => {
+      exec(compileCmd, { timeout: timeoutMs, cwd: runDir }, (compileErr, compileStdout, compileStderr) => {
         if (compileErr) {
           const elapsedNs = Number(process.hrtime.bigint() - startHrTime);
           resolve({
@@ -369,7 +509,7 @@ const executeLanguageFile = async ({
           });
           return;
         }
-        runSubprocess('java', ['-jar', jarPath], timeoutMs, startHrTime, resolve);
+        runSubprocess('java', ['-jar', jarPath], timeoutMs, startHrTime, resolve, runDir);
       });
     });
   }
@@ -381,7 +521,7 @@ const executeLanguageFile = async ({
         ? `csc /nologo /out:"${outBinaryPath}" "${filePath}"`
         : `mcs -out:"${outBinaryPath}" "${filePath}"`;
 
-      exec(compileCmd, { timeout: timeoutMs }, (compileErr, compileStdout, compileStderr) => {
+      exec(compileCmd, { timeout: timeoutMs, cwd: runDir }, (compileErr, compileStdout, compileStderr) => {
         if (compileErr) {
           const elapsedNs = Number(process.hrtime.bigint() - startHrTime);
           resolve({
@@ -396,7 +536,7 @@ const executeLanguageFile = async ({
         }
         const runnerCmd = process.platform === 'win32' ? outBinaryPath : 'mono';
         const runnerArgs = process.platform === 'win32' ? [] : [outBinaryPath];
-        runSubprocess(runnerCmd, runnerArgs, timeoutMs, startHrTime, resolve);
+        runSubprocess(runnerCmd, runnerArgs, timeoutMs, startHrTime, resolve, runDir);
       });
     });
   }
@@ -414,12 +554,13 @@ const executeLanguageFile = async ({
 /**
  * Universal subprocess execution wrapper with timeout and memory tracking
  */
-const runSubprocess = (cmd, args, timeoutMs, startHrTime, resolve) => {
+const runSubprocess = (cmd, args, timeoutMs, startHrTime, resolve, cwd = TEMP_DIR) => {
   let stdout = '';
   let stderr = '';
   let killed = false;
 
   const child = spawn(cmd, args, {
+    cwd,
     windowsHide: true,
   });
 

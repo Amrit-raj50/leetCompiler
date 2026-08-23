@@ -152,6 +152,32 @@ export const analyzeError = (rawStderr = '', language = 'javascript', userCode =
       errorType = 'ArrayIndexOutOfBoundsException';
       explanation = 'Array accessed with an invalid index.';
       suggestions = ['Check loop bounds (`i < array.length`).'];
+    } else if (stderr.includes('Main method not found') || stderr.includes('NoSuchMethodError: main')) {
+      errorType = 'Main Method Missing';
+      message = 'Main method not found in Java class';
+      explanation = 'Standalone Java programs require a `public static void main(String[] args)` method as the execution entrypoint.';
+      suggestions = [
+        'Add `public static void main(String[] args)` to your main class in Standalone mode.',
+        'Or switch to LeetCode Problem Mode to run automated test cases.'
+      ];
+    } else if (stderr.includes('cannot find symbol')) {
+      errorType = 'Java Compilation Error (Symbol Not Found)';
+      const match = stderr.match(/cannot find symbol\s*symbol:\s*([^\n]+)/);
+      if (match) message = `Symbol not found: ${match[1].trim()}`;
+      explanation = 'The compiler could not resolve a variable, method name, or class name.';
+      suggestions = [
+        'Check for typos in variable and method names.',
+        'Ensure required packages are imported (e.g. `import java.util.*;`).'
+      ];
+    } else if (stderr.includes('incompatible types')) {
+      errorType = 'Java Type Mismatch';
+      const match = stderr.match(/incompatible types:\s*([^\n]+)/);
+      if (match) message = `Type mismatch: ${match[1].trim()}`;
+      explanation = 'An expression was assigned to an incompatible target type.';
+      suggestions = [
+        'Cast the value explicitly or adjust the target type.',
+        'Check return types of your methods.'
+      ];
     } else if (stderr.includes('error:')) {
       errorType = 'Java Compilation Error';
       const match = stderr.match(/error:\s*(.+)/);
@@ -163,7 +189,7 @@ export const analyzeError = (rawStderr = '', language = 'javascript', userCode =
       ];
     }
 
-    const javaLineMatch = stderr.match(/Solution_[a-zA-Z0-9_]+\.java:(\d+):/);
+    const javaLineMatch = stderr.match(/[A-Za-z0-9_]+\.java:(\d+):/) || stderr.match(/\.java:(\d+)\)/);
     if (javaLineMatch) {
       lineNumber = parseInt(javaLineMatch[1], 10);
     }

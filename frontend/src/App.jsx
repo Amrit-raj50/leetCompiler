@@ -203,17 +203,10 @@ function App() {
     const questionSlug = mode === 'integrated' ? currentProblem.slug : 'scratchpad';
     const testCases = mode === 'integrated' ? currentProblem.testCases : [];
     
-    // Track execution count for feedback milestone
+    // Track execution count for analytics
     const newCount = runCount + 1;
     setRunCount(newCount);
     localStorage.setItem('leetcompiler_run_count', String(newCount));
-
-    // Pop up feedback modal on every 5th run milestone
-    if (newCount > 0 && newCount % 5 === 0) {
-      setTimeout(() => {
-        setIsFeedbackOpen(true);
-      }, 1500);
-    }
 
     try {
       const result = await runCodeApi({

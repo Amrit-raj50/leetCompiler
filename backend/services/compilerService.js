@@ -302,6 +302,15 @@ const executeWithJudge0 = async (code, langKey) => {
   try {
     console.log(`[JUDGE0] Submitting ${langKey} (language_id=${languageId})...`);
 
+    // Java: Judge0 uses 'Main.java' as the implicit filename.
+    // Java requires the public class name to match the filename, so strip 'public' from
+    // all top-level type declarations. This is safe — it doesn't affect runtime behavior.
+    let sourceCode = code;
+    if (langKey === 'java' || langKey === 'kt') {
+      sourceCode = code
+        .replace(/\bpublic\s+(class|interface|enum|record|@interface)\s+/g, '$1 ');
+    }
+
     const response = await fetch(
       'https://ce.judge0.com/submissions?base64_encoded=false&wait=true',
       {
@@ -309,7 +318,7 @@ const executeWithJudge0 = async (code, langKey) => {
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
         body: JSON.stringify({
-          source_code: code,
+          source_code: sourceCode,
           language_id: languageId,
           stdin: ''
         })

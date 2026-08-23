@@ -188,15 +188,19 @@ export const runCode = async (code, language = 'javascript', questionSlug = 'two
     });
 
     // If local runner failed due to missing CLI tool (e.g. javac not on server), route to cloud runner
+    // Covers: ENOENT (spawn), "command not found" (bash), ": not found" (/bin/sh on Render/Ubuntu)
+    const missingToolHint = `${execResult?.error || ''} ${execResult?.stderr || ''}`;
     const isLocalToolMissing =
-      execResult?.error &&
+      missingToolHint.trim().length > 0 &&
       (
-        execResult.error.includes('not installed') ||
-        execResult.error.includes('not in system PATH') ||
-        execResult.error.includes('ENOENT') ||
-        execResult.error.includes('is not recognized as an internal or external command') ||
-        execResult.error.includes('command not found') ||
-        execResult.error.includes('spawn ')
+        missingToolHint.includes('not installed') ||
+        missingToolHint.includes('not in system PATH') ||
+        missingToolHint.includes('ENOENT') ||
+        missingToolHint.includes('is not recognized as an internal or external command') ||
+        missingToolHint.includes('command not found') ||
+        missingToolHint.includes(': not found') ||
+        missingToolHint.includes('No such file or directory') ||
+        missingToolHint.includes('spawn ')
       );
 
     if (isLocalToolMissing) {

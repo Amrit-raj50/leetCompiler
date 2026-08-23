@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
-import { Code, ChevronDown, Play, Loader2 } from 'lucide-react';
+import { Code, ChevronDown, Play, Loader2, Copy, Check } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { LANGUAGE_LABELS, MONACO_LANG_MAP } from '../constants/templates';
 
 const CodeEditor = ({
@@ -14,6 +15,8 @@ const CodeEditor = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
+  const [copied, setCopied] = useState(false);
+  const [hovering, setHovering] = useState(false);
   const dropdownRef = useRef(null);
   const editorContentRef = useRef(null);
   const editorRef = useRef(null);
@@ -70,6 +73,17 @@ const CodeEditor = ({
   const handleLanguageChange = (newLang) => {
     setLang(newLang);
     setIsOpen(false);
+  };
+
+  const handleCopyCode = () => {
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      toast.success('Code copied to clipboard!');
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      toast.error('Failed to copy — please select and copy manually.');
+    });
   };
 
   const monacoLanguage = MONACO_LANG_MAP[lang] || 'javascript';
@@ -147,6 +161,8 @@ const CodeEditor = ({
       <div
         className="pane-content editor-pane-content"
         ref={editorContentRef}
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
         style={{
           padding: 0,
           overflow: 'hidden',
@@ -156,6 +172,41 @@ const CodeEditor = ({
           position: 'relative'
         }}
       >
+        {/* Floating Copy Button */}
+        <button
+          onClick={handleCopyCode}
+          title={copied ? 'Copied!' : 'Copy code'}
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '18px',
+            zIndex: 20,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            padding: '5px 10px',
+            fontFamily: 'var(--font-hand)',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            border: '1.5px solid var(--sketch-border)',
+            borderRadius: '4px 7px 3px 5px / 6px 3px 5px 4px',
+            backgroundColor: copied
+              ? 'rgba(34,197,94,0.12)'
+              : 'rgba(255,255,255,0.88)',
+            color: copied ? '#15803d' : 'var(--text-muted)',
+            cursor: 'pointer',
+            backdropFilter: 'blur(4px)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            opacity: hovering || copied ? 1 : 0,
+            transform: hovering || copied ? 'translateY(0)' : 'translateY(-4px)',
+            transition: 'opacity 0.18s ease, transform 0.18s ease, background-color 0.15s ease, color 0.15s ease',
+            pointerEvents: hovering || copied ? 'auto' : 'none',
+          }}
+        >
+          {copied
+            ? <><Check size={13} /><span>Copied!</span></>
+            : <><Copy size={13} /><span>Copy</span></>}
+        </button>
         <Editor
           height="100%"
           language={monacoLanguage}

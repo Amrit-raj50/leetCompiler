@@ -155,9 +155,6 @@ body {
   display: flex;
   flex-direction: column;
   background-color: var(--paper-bg);
-  background-image: linear-gradient(var(--line-color) 1px, transparent 1px);
-  background-size: 100% var(--grid-size);
-  background-position: 0 0;
 }
 
 .console-pane {
@@ -520,8 +517,8 @@ body {
     position: relative !important;
     overflow: hidden !important;
     padding: 0 !important;
-    background-image: linear-gradient(var(--line-color) 1px, transparent 1px) !important;
-    background-size: 100% 26px !important;
+    background-image: none !important;
+    background-color: var(--paper-bg) !important;
   }
 
   /* Ensure Monaco fills the pane and enables touch scrolling */

@@ -644,6 +644,7 @@ const OutputConsole = React.forwardRef(({
                               <span style={{ color: res.passed ? '#16a34a' : '#dc2626', fontWeight: 600 }}>
                                 {res.actual !== undefined ? (typeof res.actual === 'object' ? JSON.stringify(res.actual) : String(res.actual)) : 'null'}
                               </span>
+                            </div>
                           </div>
 
                           {res.error && (

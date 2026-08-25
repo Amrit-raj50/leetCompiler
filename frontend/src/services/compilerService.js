@@ -19,6 +19,10 @@ const getBaseApiUrl = () => {
     }
   }
 
+  if (isLocalHost) {
+      url = 'http://localhost:5001/api/compiler';
+  }
+
   url = url.trim().replace(/\/+$/, '');
   if (!url.endsWith('/api/compiler') && !url.endsWith('/api')) {
     url = `${url}/api/compiler`;
